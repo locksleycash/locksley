@@ -1,0 +1,14 @@
+﻿[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.28"
+optimizer = true
+optimizer_runs = 800
+# createBracket's arity puts the plain pipeline one slot over; IR codegen
+# is also what Blockscout must be told at verification time.
+via_ir = true
+remappings = ["openzeppelin-contracts/=lib/openzeppelin-contracts/", "forge-std/=lib/forge-std/src/"]
+
+[rpc_endpoints]
+rh = "https://robinhood-rpc.publicnode.com"

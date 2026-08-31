@@ -1,0 +1,9 @@
+.env
+out/
+cache/
+broadcast/
+lib/
+web/node_modules/
+web/.next/
+web/.env
+web/.vercel/
