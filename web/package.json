@@ -1,0 +1,31 @@
+{
+  "name": "hoodsave",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Order desk for tokenized equities on RH Chain (EVM 4663): limit, stop and DCA orders.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^3.37.0",
+    "@stripe/crypto": "^1.1.3",
+    "@stripe/stripe-js": "^9.13.0",
+    "next": "^16.3.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^5.9.0"
+  }
+}
+
+
