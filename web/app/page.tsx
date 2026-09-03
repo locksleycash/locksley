@@ -11,6 +11,7 @@ import {
   MAX_LTV_BPS, LIQ_THRESHOLD_BPS, BORROW_APR,
 } from "../src/bank.ts";
 import type { BankOrder } from "./api/bank/route.ts";
+import { CandleChart, Spark, useSgovSeries } from "./dash.tsx";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const SLIP = 0.99; // 1% floor on the SGOV swaps
@@ -23,7 +24,7 @@ interface Bank {
   orders?: BankOrder[];
 }
 
-type Tab = "save" | "pay" | "borrow";
+type Tab = "overview" | "save" | "pay" | "borrow";
 const COLLATERAL = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 40);
 const TERMS: [string, number][] = [["30 days", 30 * 86400], ["90 days", 90 * 86400], ["180 days", 180 * 86400]];
 const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], ["Monthly", 30 * 86400]];
@@ -31,10 +32,11 @@ const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], 
 export default function Page() {
   const wallet = useWallet();
   const fmt = useMemo(() => makeFormat("USD", 1), []);
-  const [tab, setTab] = useState<Tab>("save");
+  const [tab, setTab] = useState<Tab>("overview");
   const [b, setB] = useState<Bank | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const sgovSeries = useSgovSeries();
 
   const load = useCallback(async (addr: string) => {
     try { const r = await fetch(`/api/bank${addr ? `?address=${addr}` : ""}`); setB(await r.json()); } catch { /* keep */ }
@@ -47,52 +49,102 @@ export default function Page() {
   const fail = (e: unknown) => { const m = e instanceof Error ? e.message : String(e); setMsg({ ok: false, text: /reject|denied/i.test(m) ? "You rejected the request." : /insufficient/i.test(m) ? "Not enough ETH for gas." : "Transaction failed." }); };
   const send = (to: `0x${string}`, data: `0x${string}`) => wallet.send({ to, data });
 
+  const savingsVal = (b?.savings?.freeValue ?? 0) + (b?.savings?.lockedValue ?? 0);
+  const total = savingsVal + (b?.loan?.supplied ?? 0);
+  const HEAD: Record<Tab, string> = { overview: "Activity Dashboard", save: "Savings", pay: "Payments", borrow: "Borrow & Earn" };
+  const NAV: [Tab, React.ReactNode][] = [
+    ["overview", <path key="o" d="M3 10 12 4l9 6M5 10v9h14v-9M9 19v-5h6v5" />],
+    ["save", <><circle key="c" cx="12" cy="12" r="8" /><path key="p" d="M12 8v8M9.5 10.2c0-1 1.1-1.7 2.5-1.7s2.5.7 2.5 1.7-1.1 1.5-2.5 1.9-2.5.9-2.5 1.9 1.1 1.7 2.5 1.7 2.5-.7 2.5-1.7" /></>],
+    ["pay", <path key="s" d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5" />],
+    ["borrow", <><path key="b" d="M3 10 12 4l9 6M4 10v8h16v-8" /><path key="c2" d="M8 18v-4M12 18v-4M16 18v-4" /></>],
+  ];
+
   return (
     <div className="bnk">
-      <div className="bnk-wrap">
-        <nav className="bnk-nav">
-          <div className="bnk-brand">
-            <span className="bnk-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10 12 4l9 6" /><path d="M5 10v9h14v-9" /><path d="M9 19v-5h6v5" /></svg></span>
-            <span>HoodSave</span>
-          </div>
-          <span className="sp" />
-          {wallet.address && <span className="bnk-usdg">Wallet: <b>{fmt(usdg)}</b> USDG</span>}
-          {wallet.address
-            ? <button className="bnk-btn ghost" onClick={() => wallet.disconnect()}>{short(wallet.address)}</button>
-            : <button className="bnk-btn" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect"}</button>}
-        </nav>
-
-        {/* balance hero */}
-        <div className="bnk-hero">
-          <div className="k">Total balance</div>
-          <div className="v">{fmt((b?.savings?.freeValue ?? 0) + (b?.savings?.lockedValue ?? 0) + (b?.loan?.supplied ?? 0))}</div>
-          <div className="s">Savings, locked deposits and lending — earning on-chain, always yours.</div>
-          <div className="bnk-hero-row">
-            <div><span>Savings</span><b>{fmt((b?.savings?.freeValue ?? 0) + (b?.savings?.lockedValue ?? 0))}</b></div>
-            <div><span>Lending</span><b>{fmt(b?.loan?.supplied ?? 0)}</b></div>
-            <div><span>Borrowed</span><b>{fmt(b?.loan?.debt ?? 0)}</b></div>
-            <div><span>Wallet USDG</span><b>{fmt(usdg)}</b></div>
-          </div>
-        </div>
-
-        <div className="bnk-tabs">
-          {(["save", "pay", "borrow"] as Tab[]).map((t) => (
-            <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); }}>
-              {t === "save" ? "Save" : t === "pay" ? "Payments" : "Borrow"}
+      <div className="bshell">
+        {/* ---- rail ---- */}
+        <aside className="brail">
+          <span className="brail-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg></span>
+          {NAV.map(([t, icon]) => (
+            <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); }} aria-label={HEAD[t]}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
             </button>
           ))}
-        </div>
+          <span className="sp" />
+          <span className="brail-av" />
+        </aside>
 
-        {msg && <div className={`bnk-msg ${msg.ok ? "ok" : "err"}`} style={{ marginBottom: 16, marginTop: 0 }}>{msg.text}</div>}
+        {/* ---- main ---- */}
+        <main className="bmain">
+          <div className="bhead">
+            <h1>{HEAD[tab]}</h1>
+            <span className="sp" />
+            {wallet.address && <span className="bnk-usdg">Wallet: <b>{fmt(usdg)}</b> USDG</span>}
+            {wallet.address
+              ? <button className="bnk-btn ghost" onClick={() => wallet.disconnect()}>{short(wallet.address)}</button>
+              : <button className="bnk-btn" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect"}</button>}
+          </div>
 
-        {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
-        {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
-        {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+          {msg && <div className={`bnk-msg ${msg.ok ? "ok" : "err"}`} style={{ marginBottom: 16, marginTop: 0 }}>{msg.text}</div>}
 
-        <footer className="bnk-foot">
-          <span>HoodSave · non-custodial banking on RH Chain</span>
-          <span>Savings backed by SGOV (t-bills) · no admin · no fees</span>
-        </footer>
+          {tab === "overview" && (
+            <div className="bover">
+              {/* left: balance card + actions + activity */}
+              <div>
+                <h2 className="bsec">Your account</h2>
+                <div className="bbal">Total balance</div>
+                <div className="bbal-row"><span className="bbal-v">{fmt(total)}</span></div>
+                <div className="bcard">
+                  <span className="visa">SAVE</span>
+                  <span className="tag">HoodSave · Savings</span>
+                  <span className="sp" />
+                  <div className="nm">{wallet.address ? "Your vault" : "Not connected"}</div>
+                  <div className="no">{wallet.address ? `${wallet.address.slice(2, 6)}  ${wallet.address.slice(6, 10)}  ${wallet.address.slice(10, 14)}  ${wallet.address.slice(-4)}` : "•••• •••• •••• ••••"}</div>
+                  <div className="meta"><span>Backed by SGOV</span><span>Balance {fmt(savingsVal)}</span></div>
+                </div>
+                <div className="bacts">
+                  <button className="bact primary" onClick={() => setTab("save")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>Deposit</button>
+                  <button className="bact" onClick={() => setTab("pay")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>Send</button>
+                  <button className="bact" onClick={() => setTab("borrow")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9 12 4l9 5M5 9v9h14V9" /></svg>Borrow</button>
+                </div>
+                <h2 className="bsec" style={{ fontSize: 15, marginTop: 8 }}>Recent activity</h2>
+                {!wallet.address ? <div className="bnk-empty">Connect a wallet to see activity.</div> : (
+                  <div>
+                    {savingsVal > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 6v12M6 12l6 6 6-6" /></svg></span><div className="id"><b>Savings balance</b><span>SGOV-backed</span></div><span className="amt up">{fmt(savingsVal)}</span></div>}
+                    {(b?.loan?.supplied ?? 0) > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16v10H4zM4 11h16" /></svg></span><div className="id"><b>Lending supplied</b><span>earning interest</span></div><span className="amt up">{fmt(b?.loan?.supplied ?? 0)}</span></div>}
+                    {(b?.loan?.debt ?? 0) > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3 3 9v11h18V9z" /></svg></span><div className="id"><b>Borrowed</b><span>against collateral</span></div><span className="amt down">−{fmt(b?.loan?.debt ?? 0)}</span></div>}
+                    {(b?.orders ?? []).slice(0, 4).map((o) => (
+                      <div className="btx" key={o.id}><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 12h14M12 5l7 7-7 7" /></svg></span><div className="id"><b>Pay → {short(o.recipient)}</b><span>every {Math.round(o.intervalS / 86400)}d · {o.open ? "active" : "done"}</span></div><span className="amt down">−{fmt(o.amount)}</span></div>
+                    ))}
+                    {savingsVal === 0 && (b?.loan?.supplied ?? 0) === 0 && (b?.loan?.debt ?? 0) === 0 && (b?.orders ?? []).length === 0 && <div className="bnk-empty">Nothing yet — deposit to get started.</div>}
+                  </div>
+                )}
+              </div>
+
+              {/* right: activity board */}
+              <div className="bboard">
+                <h2 className="bsec">Highlighted</h2>
+                <div className="bhl">
+                  <div className="bhl-card"><span className="bhl-ic">S</span><div className="bhl-id"><b>Savings</b><span>SGOV</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(savingsVal)}</b><span>balance</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic">L</span><div className="bhl-id"><b>Lending</b><span>earn</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(b?.loan?.supplied ?? 0)}</b><span>supplied</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic">B</span><div className="bhl-id"><b>Borrowed</b><span>debt</span></div><div className="bhl-v" style={{ marginLeft: "auto" }}><b>{fmt(b?.loan?.debt ?? 0)}</b><span>owed</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic">$</span><div className="bhl-id"><b>SGOV</b><span>price</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(sgovPrice)}</b><span>now</span></div></div>
+                </div>
+
+                <CandleChart symbol="SGOV" />
+
+                <div className="bres">
+                  <div className="bres-card"><div className="k"><span>Lending reserve</span><a onClick={() => setTab("borrow")}>Manage</a></div><div className="v">{fmt(b?.loan?.supplied ?? 0)}</div><span className="chip">≈ {8}% APR</span></div>
+                  <div className="bres-card"><div className="k"><span>Borrow capacity</span><a onClick={() => setTab("borrow")}>Use</a></div><div className="v">{fmt(Math.max(0, (b?.loan?.collateralValue ?? 0) * 0.5 - (b?.loan?.debt ?? 0)))}</div><span className="chip">up to 50% LTV</span></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+          {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+          {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+        </main>
       </div>
     </div>
   );
