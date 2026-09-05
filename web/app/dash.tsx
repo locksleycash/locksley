@@ -19,6 +19,27 @@ export function Spark({ points, w = 120, h = 30 }: { points: Point[] | null; w?:
   );
 }
 
+/** Where the money sits, as a ring. */
+export function Donut({ parts, size = 148 }: { parts: { label: string; value: number; color: string }[]; size?: number }) {
+  const live = parts.filter((p) => p.value > 0);
+  const total = live.reduce((s, p) => s + p.value, 0);
+  const r = size / 2 - 13, C = 2 * Math.PI * r, cx = size / 2;
+  let acc = 0;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden style={{ flex: "none" }}>
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#1b1e1a" strokeWidth={15} />
+      {total > 0 && live.map((p) => {
+        const frac = p.value / total, dash = frac * C;
+        const el = <circle key={p.label} cx={cx} cy={cx} r={r} fill="none" stroke={p.color} strokeWidth={15}
+          strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={-acc * C} transform={`rotate(-90 ${cx} ${cx})`} />;
+        acc += frac; return el;
+      })}
+      <text x={cx} y={cx - 1} textAnchor="middle" fontSize="21" fontWeight="700" fill="#f3f5f2">{live.length}</text>
+      <text x={cx} y={cx + 15} textAnchor="middle" fontSize="9.5" fill="#9aa39a">buckets</text>
+    </svg>
+  );
+}
+
 interface Candle { o: number; h: number; l: number; c: number }
 function toCandles(points: Point[], target = 30): Candle[] {
   if (points.length < 2) return [];

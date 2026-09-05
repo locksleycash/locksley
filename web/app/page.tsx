@@ -11,7 +11,7 @@ import {
   MAX_LTV_BPS, LIQ_THRESHOLD_BPS, BORROW_APR,
 } from "../src/bank.ts";
 import type { BankOrder } from "./api/bank/route.ts";
-import { CandleChart, Spark, useSgovSeries } from "./dash.tsx";
+import { CandleChart, Donut, Spark, useSgovSeries } from "./dash.tsx";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const SLIP = 0.99; // 1% floor on the SGOV swaps
@@ -36,6 +36,25 @@ const COLLATERAL = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 40);
 const TERMS: [string, number][] = [["30 days", 30 * 86400], ["90 days", 90 * 86400], ["180 days", 180 * 86400]];
 const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], ["Monthly", 30 * 86400]];
 
+/** Which part of the bank an event came from. */
+const GRP: Record<string, string> = {
+  Deposited: "Savings", Withdrawn: "Savings",
+  Created: "Payments", Paid: "Payments",
+  Supplied: "Loan", Borrowed: "Loan", Repaid: "Loan", Liquidated: "Loan",
+};
+
+/** label, destination tab, icon path */
+const QUICK: [string, string, string][] = [
+  ["Deposit", "save", "M12 5v12M6 12l6 6 6-6"],
+  ["Withdraw", "save", "M12 19V7M6 12l6-6 6 6"],
+  ["Lock", "save", "M7 11V8a5 5 0 0110 0v3M6 11h12v9H6z"],
+  ["Send", "pay", "M5 12h14M12 5l7 7-7 7"],
+  ["Schedule", "pay", "M12 21a9 9 0 100-18 9 9 0 000 18zM12 7.5V12l3.2 2"],
+  ["Lend", "borrow", "M4 7h16v10H4zM4 11h16"],
+  ["Borrow", "borrow", "M3 9l9-5 9 5M5 9v9h14V9"],
+  ["Live", "live", "M3 12h4l2.5-6 4 12 2.5-6h5"],
+];
+
 export default function Page() {
   const wallet = useWallet();
   const fmt = useMemo(() => makeFormat("USD", 1), []);
@@ -44,6 +63,18 @@ export default function Page() {
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const sgovSeries = useSgovSeries();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [showHow, setShowHow] = useState(true);
+  const [hq, setHq] = useState("");
+  const [hf, setHf] = useState<"all" | "Savings" | "Payments" | "Loan">("all");
+
+  useEffect(() => {
+    let on = true;
+    const pull = () => fetch("/api/stats").then((r) => r.json()).then((j) => on && setStats(j as Stats)).catch(() => {});
+    pull();
+    const t = setInterval(pull, 15_000);
+    return () => { on = false; clearInterval(t); };
+  }, []);
 
   const load = useCallback(async (addr: string) => {
     try { const r = await fetch(`/api/bank${addr ? `?address=${addr}` : ""}`); setB(await r.json()); } catch { /* keep */ }
@@ -94,6 +125,31 @@ export default function Page() {
           </div>
 
           {msg && <div className={`bnk-msg ${msg.ok ? "ok" : "err"}`} style={{ marginBottom: 16, marginTop: 0 }}>{msg.text}</div>}
+
+          {tab === "overview" && showHow && (
+            <div className="bwork">
+              <button className="bwork-x" onClick={() => setShowHow(false)} aria-label="Dismiss">×</button>
+              <div className="bwork-k">How HoodSave works</div>
+              <div className="bwork-steps">
+                {[
+                  ["Deposit USDG", "Your cash buys SGOV — short U.S. treasuries — held in the vault under your name."],
+                  ["It earns by itself", "SGOV rises against USDG. No farming, no promises: the yield is the treasury bill."],
+                  ["Withdraw any time", "Sell back and the USDG lands in your wallet. Only you can withdraw — never us."],
+                ].map(([t, d], i) => (
+                  <div className="bwork-s" key={t}><span className="n">{i + 1}</span><div><b>{t}</b><p>{d}</p></div></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === "overview" && (
+            <div className="bstrip">
+              <div><span>Total balance</span><b>{fmt(total)}</b></div>
+              <div><span>Savings TVL</span><b>{fmt(stats?.savingsTvl ?? 0)}</b></div>
+              <div><span>Borrowed</span><b>{fmt(b?.loan?.debt ?? 0)}</b></div>
+              <div><span>SGOV price</span><b>{fmt(sgovPrice)}</b></div>
+            </div>
+          )}
 
           {tab === "overview" && (
             <div className="bover">
@@ -149,10 +205,88 @@ export default function Page() {
             </div>
           )}
 
+          {tab === "overview" && (() => {
+            const alloc = [
+              { label: "Savings", value: b?.savings?.freeValue ?? 0, color: "#4ade80" },
+              { label: "Locked", value: b?.savings?.lockedValue ?? 0, color: "#22a06b" },
+              { label: "Lending", value: b?.loan?.supplied ?? 0, color: "#7dd3a8" },
+              { label: "Wallet USDG", value: usdg, color: "#4a5a50" },
+            ];
+            const sum = alloc.reduce((s, p) => s + p.value, 0);
+            const mine = (stats?.activity ?? []).filter((a) => !wallet.address || a.user.toLowerCase() === wallet.address.toLowerCase());
+            const rows = mine.filter((a) => (hf === "all" || GRP[a.kind] === hf) && (!hq || a.detail.toLowerCase().includes(hq.toLowerCase()) || a.kind.toLowerCase().includes(hq.toLowerCase())));
+            return (
+              <>
+                <div className="bnk-grid" style={{ marginTop: 22 }}>
+                  <div className="bnk-card">
+                    <h3>Your allocation</h3>
+                    <p className="sub">Where every dollar sits right now.</p>
+                    <div className="balloc">
+                      <Donut parts={alloc} />
+                      <div className="balloc-list">
+                        {alloc.map((p) => {
+                          const pc = sum > 0 ? (p.value / sum) * 100 : 0;
+                          return (
+                            <div className="balloc-row" key={p.label}>
+                              <span className="dot" style={{ background: p.color }} />
+                              <b>{p.label}</b>
+                              <span className="bar"><i style={{ width: `${pc}%`, background: p.color }} /></span>
+                              <span className="pv">{pc.toFixed(0)}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bnk-card">
+                    <h3>Quick actions</h3>
+                    <p className="sub">Everything the bank can do, one tap away.</p>
+                    <div className="bicons">
+                      {QUICK.map(([label, to, d]) => (
+                        <button className="bico" key={label} onClick={() => setTab(to as Tab)}>
+                          <span className="bico-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg></span>
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <h2 className="bsec" style={{ marginTop: 26 }}>History<span className="sp" /><span className="bnk-tag open">● live</span></h2>
+                <div className="bnk-card">
+                  <div className="bhist-tools">
+                    <label className="bsearch">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+                      <input placeholder="Search activity…" value={hq} onChange={(e) => setHq(e.target.value)} />
+                    </label>
+                    <div className="bchips">
+                      {(["all", "Savings", "Payments", "Loan"] as const).map((f) => (
+                        <button key={f} className={hf === f ? "on" : ""} onClick={() => setHf(f)}>{f === "all" ? "All" : f}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bhist">
+                    <div className="bhist-r head"><span>Event</span><span>Group</span><span>Address</span><span>Block</span></div>
+                    {rows.length === 0 ? <div className="bnk-empty">{wallet.address ? "No activity for this wallet yet." : "Connect a wallet, or wait for the first on-chain move."}</div>
+                      : rows.slice(0, 12).map((a, i) => (
+                        <a className="bhist-r" key={a.tx + i} href={`${EXPLORER_URL}/tx/${a.tx}`} target="_blank" rel="noreferrer">
+                          <span className="ev"><i className={`d ${GRP[a.kind]?.toLowerCase() ?? ""}`} />{a.detail}</span>
+                          <span className="g">{GRP[a.kind] ?? a.kind}</span>
+                          <span className="ad">{a.user ? short(a.user) : "—"}</span>
+                          <span className="bl">#{a.block} ↗</span>
+                        </a>
+                      ))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+
           {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
           {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
           {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
-          {tab === "live" && <LiveTab fmt={fmt} />}
+          {tab === "live" && <LiveTab fmt={fmt} s={stats} />}
         </main>
       </div>
     </div>
@@ -169,17 +303,8 @@ type Common = {
 
 const EXPLORER_URL = "https://robinhoodchain.blockscout.com";
 
-/** Protocol-wide numbers, refreshed every 15s. */
-function LiveTab({ fmt }: { fmt: (n: number) => string }) {
-  const [s, setS] = useState<Stats | null>(null);
-  useEffect(() => {
-    let on = true;
-    const pull = () => fetch("/api/stats").then((r) => r.json()).then((j) => on && setS(j as Stats)).catch(() => {});
-    pull();
-    const t = setInterval(pull, 15_000);
-    return () => { on = false; clearInterval(t); };
-  }, []);
-
+/** Protocol-wide numbers; the page keeps them fresh every 15s. */
+function LiveTab({ fmt, s }: { fmt: (n: number) => string; s: Stats | null }) {
   if (!s) return <div className="bnk-empty">Reading the chain…</div>;
   const anyLive = s.live.savings || s.live.payments || s.live.loan;
   const tvl = s.savingsTvl + s.lendingReserve;
