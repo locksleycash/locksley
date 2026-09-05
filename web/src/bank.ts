@@ -1,4 +1,6 @@
 import { USDG } from "./stocks.ts";
+import { V3_FACTORY } from "./pools.ts";
+import { priceFromSqrt } from "./prices.ts";
 
 /** The three bank contracts. Empty until deployed — the UI checks before signing. */
 export const SAVINGS = (process.env.NEXT_PUBLIC_SAVINGS_ADDRESS ?? "") as `0x${string}` | "";
@@ -53,10 +55,30 @@ export const loanAbi = [
   { type: "function", name: "supplyShares", stateMutability: "view", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }] },
   { type: "function", name: "totalSupplyShares", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "reserveValue", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "totalBorrows", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "positions", stateMutability: "view", inputs: [{ type: "address" }], outputs: [
     { name: "collToken", type: "address" }, { name: "collFee", type: "uint24" }, { name: "collateral", type: "uint256" }, { name: "principalScaled", type: "uint256" },
   ] },
 ] as const;
+
+const factoryAbi = [{ type: "function", name: "getPool", stateMutability: "view", inputs: [{ type: "address" }, { type: "address" }, { type: "uint24" }], outputs: [{ type: "address" }] }] as const;
+const slot0Abi = [{ type: "function", name: "slot0", stateMutability: "view", inputs: [], outputs: [
+  { type: "uint160" }, { type: "int24" }, { type: "uint16" }, { type: "uint16" }, { type: "uint16" }, { type: "uint8" }, { type: "bool" },
+] }] as const;
+
+/** USDG per SGOV from the pool, or 0 when it can't be read. Takes the client so
+ *  this file stays free of server-only imports. */
+export async function readSgovPrice(client: {
+  readContract: (a: never) => Promise<unknown>;
+}): Promise<number> {
+  try {
+    const pool = (await client.readContract({ address: V3_FACTORY, abi: factoryAbi, functionName: "getPool", args: [SGOV, USDG, SGOV_FEE] } as never)) as string;
+    if (!pool || pool === "0x0000000000000000000000000000000000000000") return 0;
+    const s = (await client.readContract({ address: pool, abi: slot0Abi, functionName: "slot0" } as never)) as readonly unknown[];
+    const p = priceFromSqrt(s[0] as bigint, SGOV);
+    return Number.isFinite(p) && p > 0 ? p : 0;
+  } catch { return 0; }
+}
 
 export const MAX_LTV_BPS = 5000;
 export const LIQ_THRESHOLD_BPS = 6000;

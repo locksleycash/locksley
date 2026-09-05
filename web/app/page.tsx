@@ -24,7 +24,14 @@ interface Bank {
   orders?: BankOrder[];
 }
 
-type Tab = "overview" | "save" | "pay" | "borrow";
+type Tab = "overview" | "save" | "pay" | "borrow" | "live";
+
+interface StatAct { kind: string; user: string; detail: string; tx: string; block: number }
+interface Stats {
+  live: { savings: boolean; payments: boolean; loan: boolean };
+  sgovPrice: number; savingsTvl: number; lendingReserve: number; totalBorrowed: number;
+  activeOrders: number; escrowed: number; participants: number; activity: StatAct[];
+}
 const COLLATERAL = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 40);
 const TERMS: [string, number][] = [["30 days", 30 * 86400], ["90 days", 90 * 86400], ["180 days", 180 * 86400]];
 const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], ["Monthly", 30 * 86400]];
@@ -51,12 +58,13 @@ export default function Page() {
 
   const savingsVal = (b?.savings?.freeValue ?? 0) + (b?.savings?.lockedValue ?? 0);
   const total = savingsVal + (b?.loan?.supplied ?? 0);
-  const HEAD: Record<Tab, string> = { overview: "Activity Dashboard", save: "Savings", pay: "Payments", borrow: "Borrow & Earn" };
+  const HEAD: Record<Tab, string> = { overview: "Activity Dashboard", save: "Savings", pay: "Payments", borrow: "Borrow & Earn", live: "Live Stats" };
   const NAV: [Tab, React.ReactNode][] = [
     ["overview", <path key="o" d="M3 10 12 4l9 6M5 10v9h14v-9M9 19v-5h6v5" />],
     ["save", <><circle key="c" cx="12" cy="12" r="8" /><path key="p" d="M12 8v8M9.5 10.2c0-1 1.1-1.7 2.5-1.7s2.5.7 2.5 1.7-1.1 1.5-2.5 1.9-2.5.9-2.5 1.9 1.1 1.7 2.5 1.7 2.5-.7 2.5-1.7" /></>],
     ["pay", <path key="s" d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5" />],
     ["borrow", <><path key="b" d="M3 10 12 4l9 6M4 10v8h16v-8" /><path key="c2" d="M8 18v-4M12 18v-4M16 18v-4" /></>],
+    ["live", <path key="l" d="M3 12h4l2.5-6 4 12 2.5-6h5" />],
   ];
 
   return (
@@ -144,6 +152,7 @@ export default function Page() {
           {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
           {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
           {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+          {tab === "live" && <LiveTab fmt={fmt} />}
         </main>
       </div>
     </div>
@@ -155,6 +164,65 @@ type Common = {
   send: (to: `0x${string}`, data: `0x${string}`) => Promise<`0x${string}`>; done: (t: string) => void; fail: (e: unknown) => void;
   wallet: ReturnType<typeof useWallet>;
 };
+
+// ---------------------------------------------------------------- Live stats
+
+const EXPLORER_URL = "https://robinhoodchain.blockscout.com";
+
+/** Protocol-wide numbers, refreshed every 15s. */
+function LiveTab({ fmt }: { fmt: (n: number) => string }) {
+  const [s, setS] = useState<Stats | null>(null);
+  useEffect(() => {
+    let on = true;
+    const pull = () => fetch("/api/stats").then((r) => r.json()).then((j) => on && setS(j as Stats)).catch(() => {});
+    pull();
+    const t = setInterval(pull, 15_000);
+    return () => { on = false; clearInterval(t); };
+  }, []);
+
+  if (!s) return <div className="bnk-empty">Reading the chain…</div>;
+  const anyLive = s.live.savings || s.live.payments || s.live.loan;
+  const tvl = s.savingsTvl + s.lendingReserve;
+
+  return (
+    <>
+      {!anyLive && <div className="bnk-msg err" style={{ marginBottom: 16, marginTop: 0 }}>Contracts aren&apos;t deployed yet — these figures go live the moment they are.</div>}
+
+      <div className="bres" style={{ marginBottom: 16 }}>
+        <div className="bres-card"><div className="k"><span>Total value locked</span><span className="bnk-tag open">● live</span></div><div className="v">{fmt(tvl)}</div><span className="chip">savings + lending reserve</span></div>
+        <div className="bres-card"><div className="k"><span>Total borrowed</span></div><div className="v">{fmt(s.totalBorrowed)}</div><span className="chip">against stock collateral</span></div>
+      </div>
+
+      <div className="bnk-grid">
+        <div className="bnk-card">
+          <h3>Protocol</h3>
+          <p className="sub">Read straight from the three bank contracts, refreshed every 15 seconds.</p>
+          <div className="bnk-kv"><span>Savings TVL</span><b>{fmt(s.savingsTvl)}</b></div>
+          <div className="bnk-kv"><span>Lending reserve</span><b>{fmt(s.lendingReserve)}</b></div>
+          <div className="bnk-kv"><span>Borrowed</span><b>{fmt(s.totalBorrowed)}</b></div>
+          <div className="bnk-kv"><span>Utilisation</span><b>{s.lendingReserve > 0 ? `${Math.round((s.totalBorrowed / s.lendingReserve) * 100)}%` : "—"}</b></div>
+          <div className="bnk-kv"><span>Active standing orders</span><b>{s.activeOrders}</b></div>
+          <div className="bnk-kv"><span>Escrowed for payments</span><b>{fmt(s.escrowed)}</b></div>
+          <div className="bnk-kv"><span>Participants</span><b>{s.participants}</b></div>
+          <div className="bnk-kv"><span>SGOV price</span><b>{fmt(s.sgovPrice)}</b></div>
+        </div>
+
+        <div className="bnk-card">
+          <h3>Live activity</h3>
+          <p className="sub">Every deposit, payment, borrow and repayment across the bank.</p>
+          {s.activity.length === 0 ? <div className="bnk-empty">No on-chain activity yet.</div>
+            : s.activity.map((a, i) => (
+              <a className="btx" key={a.tx + i} href={`${EXPLORER_URL}/tx/${a.tx}`} target="_blank" rel="noreferrer">
+                <span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 12h4l2.5-6 4 12 2.5-6h5" /></svg></span>
+                <div className="id"><b>{a.detail}</b><span>{a.user ? short(a.user) : "—"} · block {a.block}</span></div>
+                <span className="amt">{a.kind}</span>
+              </a>
+            ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 // ---------------------------------------------------------------- Save
 
