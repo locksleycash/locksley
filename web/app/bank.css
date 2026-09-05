@@ -180,3 +180,76 @@ html:has(.bnk), html:has(.bnk) body { background: #070807; }
 .bnk-tag.done { background: var(--panel-2); color: var(--dim); }
 .bnk-empty { padding: 26px 10px; text-align: center; color: var(--dim); font-size: 13px; }
 .bnk-big { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   Alignment, gradient and motion pass — cards share one height,
+   one gradient, and answer to hover. Nothing decorative beyond that.
+   ============================================================ */
+
+/* equal height across every grid */
+.bnk-grid, .bhl, .bres { align-items: stretch; }
+.bnk-card, .bhl-card, .bres-card, .bchart { height: 100%; }
+/* a card is a column so its primary button lands on the same line as its neighbour's */
+.bnk-card { display: flex; flex-direction: column; }
+.bnk-card > .bnk-btn.wide:last-child { margin-top: auto; }
+
+/* one gradient for every surface, plus a hairline of light on the top edge */
+.bnk-card, .bchart, .bhl-card {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #191d19 0%, #101210 62%);
+}
+.bnk-card::before, .bchart::before, .bhl-card::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(74,222,128,.32), transparent);
+}
+.bres-card { background: linear-gradient(150deg, #12331f, #0e2a1a 55%, #0b1f14); }
+
+/* hover: a small lift, a greener edge */
+.bnk-card, .bhl-card, .bres-card, .bchart {
+  transition: transform .22s cubic-bezier(.22,1,.36,1), border-color .22s ease, box-shadow .22s ease;
+}
+.bnk-card:hover, .bhl-card:hover, .bres-card:hover, .bchart:hover {
+  transform: translateY(-2px); border-color: #2c5c40;
+  box-shadow: 0 20px 40px -26px rgba(52,208,127,.55);
+}
+
+/* rail icons: nudge on hover, breathe while active */
+.brail button svg { transition: transform .22s cubic-bezier(.22,1,.36,1); }
+.brail button:hover svg { transform: translateY(-2px) scale(1.08); }
+.brail button.on::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 17px;
+  border: 1px solid rgba(52,208,127,.5); animation: bpulse 2.4s ease-in-out infinite; pointer-events: none;
+}
+@keyframes bpulse { 0%, 100% { transform: scale(.92); opacity: 0; } 50% { transform: scale(1.04); opacity: 1; } }
+
+/* action buttons: the arrow leads the way */
+.bact svg { transition: transform .2s cubic-bezier(.22,1,.36,1); }
+.bact:hover svg { transform: translateX(3px); }
+.bact:first-child:hover svg { transform: translateY(2px); }
+.bact:active, .bnk-btn:active { transform: translateY(1px) scale(.99); }
+
+/* transaction rows: the icon lights up under the cursor */
+.btx { border-radius: 10px; padding-left: 8px; padding-right: 8px; transition: background .16s ease; }
+.btx:hover { background: rgba(74,222,128,.06); }
+.btx .ic { transition: transform .2s cubic-bezier(.22,1,.36,1), color .2s ease, background .2s ease; }
+.btx:hover .ic { transform: scale(1.08); color: var(--em-2); background: rgba(74,222,128,.12); }
+
+/* highlighted tiles: the badge floats a little */
+.bhl-ic { transition: transform .25s cubic-bezier(.22,1,.36,1); }
+.bhl-card:hover .bhl-ic { transform: translateY(-2px) rotate(-4deg); }
+
+/* the balance card gets one slow sheen so it reads as the hero */
+.bcard::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: skewX(-14deg); animation: bsheen 6s ease-in-out infinite; pointer-events: none;
+}
+@keyframes bsheen { 0%, 65% { left: -60%; } 100% { left: 130%; } }
+
+/* the live tag actually blinks */
+.bnk-tag.open { animation: blive 1.8s ease-in-out infinite; }
+@keyframes blive { 50% { opacity: .55; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bnk *, .bnk *::before, .bnk *::after { animation: none !important; transition: none !important; }
+}
