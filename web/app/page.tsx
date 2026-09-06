@@ -65,8 +65,6 @@ export default function Page() {
   const sgovSeries = useSgovSeries();
   const [stats, setStats] = useState<Stats | null>(null);
   const [showHow, setShowHow] = useState(true);
-  const [hq, setHq] = useState("");
-  const [hf, setHf] = useState<"all" | "Savings" | "Payments" | "Loan">("all");
 
   useEffect(() => {
     let on = true;
@@ -213,8 +211,6 @@ export default function Page() {
               { label: "Wallet USDG", value: usdg, color: "#4a5a50" },
             ];
             const sum = alloc.reduce((s, p) => s + p.value, 0);
-            const mine = (stats?.activity ?? []).filter((a) => !wallet.address || a.user.toLowerCase() === wallet.address.toLowerCase());
-            const rows = mine.filter((a) => (hf === "all" || GRP[a.kind] === hf) && (!hq || a.detail.toLowerCase().includes(hq.toLowerCase()) || a.kind.toLowerCase().includes(hq.toLowerCase())));
             return (
               <>
                 <div className="bnk-grid" style={{ marginTop: 22 }}>
@@ -253,39 +249,14 @@ export default function Page() {
                   </div>
                 </div>
 
-                <h2 className="bsec" style={{ marginTop: 26 }}>History<span className="sp" /><span className="bnk-tag open">● live</span></h2>
-                <div className="bnk-card">
-                  <div className="bhist-tools">
-                    <label className="bsearch">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
-                      <input placeholder="Search activity…" value={hq} onChange={(e) => setHq(e.target.value)} />
-                    </label>
-                    <div className="bchips">
-                      {(["all", "Savings", "Payments", "Loan"] as const).map((f) => (
-                        <button key={f} className={hf === f ? "on" : ""} onClick={() => setHf(f)}>{f === "all" ? "All" : f}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bhist">
-                    <div className="bhist-r head"><span>Event</span><span>Group</span><span>Address</span><span>Block</span></div>
-                    {rows.length === 0 ? <div className="bnk-empty">{wallet.address ? "No activity for this wallet yet." : "Connect a wallet, or wait for the first on-chain move."}</div>
-                      : rows.slice(0, 12).map((a, i) => (
-                        <a className="bhist-r" key={a.tx + i} href={`${EXPLORER_URL}/tx/${a.tx}`} target="_blank" rel="noreferrer">
-                          <span className="ev"><i className={`d ${GRP[a.kind]?.toLowerCase() ?? ""}`} />{a.detail}</span>
-                          <span className="g">{GRP[a.kind] ?? a.kind}</span>
-                          <span className="ad">{a.user ? short(a.user) : "—"}</span>
-                          <span className="bl">#{a.block} ↗</span>
-                        </a>
-                      ))}
-                  </div>
-                </div>
+                <History acts={stats?.activity ?? []} address={wallet.address} />
               </>
             );
           })()}
 
-          {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
-          {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
-          {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} />}
+          {tab === "save" && <SaveTab b={b} fmt={fmt} usdg={usdg} sgovPrice={sgovPrice} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} acts={stats?.activity ?? []} />}
+          {tab === "pay" && <PayTab b={b} fmt={fmt} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} acts={stats?.activity ?? []} />}
+          {tab === "borrow" && <BorrowTab b={b} fmt={fmt} usdg={usdg} busy={busy} setBusy={setBusy} send={send} done={done} fail={fail} wallet={wallet} acts={stats?.activity ?? []} />}
           {tab === "live" && <LiveTab fmt={fmt} s={stats} />}
         </main>
       </div>
@@ -297,11 +268,63 @@ type Common = {
   b: Bank | null; fmt: (n: number) => string; busy: string | null; setBusy: (s: string | null) => void;
   send: (to: `0x${string}`, data: `0x${string}`) => Promise<`0x${string}`>; done: (t: string) => void; fail: (e: unknown) => void;
   wallet: ReturnType<typeof useWallet>;
+  acts: StatAct[];
 };
 
-// ---------------------------------------------------------------- Live stats
+// ---------------------------------------------------------------- shared bits
 
 const EXPLORER_URL = "https://robinhoodchain.blockscout.com";
+
+/** The divided stat rail every tab opens with. */
+function Strip({ cells }: { cells: [string, string][] }) {
+  return <div className="bstrip">{cells.map(([k, v]) => <div key={k}><span>{k}</span><b>{v}</b></div>)}</div>;
+}
+
+/** Searchable activity table. `fixed` pins it to one part of the bank and
+ *  hides the chips; without it the chips let the reader switch. */
+function History({ acts, address, fixed, title = "History" }: { acts: StatAct[]; address?: string | null; fixed?: string; title?: string }) {
+  const [q, setQ] = useState("");
+  const [f, setF] = useState("all");
+  const g = fixed ?? f;
+  const rows = acts
+    .filter((a) => !address || a.user.toLowerCase() === address.toLowerCase())
+    .filter((a) => (g === "all" || GRP[a.kind] === g) && (!q || a.detail.toLowerCase().includes(q.toLowerCase()) || a.kind.toLowerCase().includes(q.toLowerCase())));
+
+  return (
+    <>
+      <h2 className="bsec" style={{ marginTop: 26 }}>{title}<span className="sp" /><span className="bnk-tag open">● live</span></h2>
+      <div className="bnk-card">
+        <div className="bhist-tools">
+          <label className="bsearch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+            <input placeholder="Search activity…" value={q} onChange={(e) => setQ(e.target.value)} />
+          </label>
+          {!fixed && (
+            <div className="bchips">
+              {["all", "Savings", "Payments", "Loan"].map((c) => (
+                <button key={c} className={f === c ? "on" : ""} onClick={() => setF(c)}>{c === "all" ? "All" : c}</button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="bhist">
+          <div className="bhist-r head"><span>Event</span><span>Group</span><span>Address</span><span>Block</span></div>
+          {rows.length === 0 ? <div className="bnk-empty">{address ? "No activity for this wallet yet." : "Connect a wallet, or wait for the first on-chain move."}</div>
+            : rows.slice(0, 12).map((a, i) => (
+              <a className="bhist-r" key={a.tx + i} href={`${EXPLORER_URL}/tx/${a.tx}`} target="_blank" rel="noreferrer">
+                <span className="ev"><i className={`d ${GRP[a.kind]?.toLowerCase() ?? ""}`} />{a.detail}</span>
+                <span className="g">{GRP[a.kind] ?? a.kind}</span>
+                <span className="ad">{a.user ? short(a.user) : "—"}</span>
+                <span className="bl">#{a.block} ↗</span>
+              </a>
+            ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------- Live stats
 
 /** Protocol-wide numbers; the page keeps them fresh every 15s. */
 function LiveTab({ fmt, s }: { fmt: (n: number) => string; s: Stats | null }) {
@@ -351,7 +374,7 @@ function LiveTab({ fmt, s }: { fmt: (n: number) => string; s: Stats | null }) {
 
 // ---------------------------------------------------------------- Save
 
-function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wallet }: Common & { usdg: number; sgovPrice: number }) {
+function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wallet, acts }: Common & { usdg: number; sgovPrice: number }) {
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"open" | "locked">("open");
   const [term, setTerm] = useState(TERMS[0][1]);
@@ -390,6 +413,13 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
   };
 
   return (
+    <>
+    <Strip cells={[
+      ["Free balance", fmt(free)],
+      ["Locked", fmt(locked)],
+      ["Unlocks", locked > 0 && unlockAt > 0 ? new Date(unlockAt * 1000).toLocaleDateString() : "—"],
+      ["SGOV price", fmt(sgovPrice)],
+    ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
         <h3>Savings</h3>
@@ -425,12 +455,14 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
         <p className="bnk-note">{sgovPrice > 0 ? `1 SGOV ≈ ${fmt(sgovPrice)} · ` : ""}Yield is SGOV appreciating vs USDG — real, not promised. Non-custodial: only you can withdraw.</p>
       </div>
     </div>
+    <History acts={acts} address={wallet.address} fixed="Savings" title="Savings history" />
+    </>
   );
 }
 
 // ---------------------------------------------------------------- Pay
 
-function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet }: Common) {
+function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet, acts }: Common) {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [interval, setInterval_] = useState(INTERVALS[1][1]);
@@ -458,7 +490,16 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet }: Common) {
   };
   const every = (s: number) => (s === 86400 ? "day" : s === 604800 ? "week" : s === 2592000 ? "month" : `${Math.round(s / 86400)}d`);
 
+  const open = orders.filter((o) => o.open);
+  const nextDue = open.length ? Math.min(...open.map((o) => o.nextDue)) : 0;
   return (
+    <>
+    <Strip cells={[
+      ["Active orders", String(open.length)],
+      ["Escrowed", fmt(open.reduce((s, o) => s + o.remaining, 0))],
+      ["Next payment", nextDue ? new Date(nextDue * 1000).toLocaleDateString() : "—"],
+      ["Per cycle", fmt(open.reduce((s, o) => s + o.amount, 0))],
+    ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
         <h3>New standing order</h3>
@@ -486,12 +527,14 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet }: Common) {
           ))}
       </div>
     </div>
+    <History acts={acts} address={wallet.address} fixed="Payments" title="Payment history" />
+    </>
   );
 }
 
 // ---------------------------------------------------------------- Borrow
 
-function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet }: Common & { usdg: number }) {
+function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts }: Common & { usdg: number }) {
   const [sup, setSup] = useState("");
   const [red, setRed] = useState("");
   const [collSym, setCollSym] = useState(COLLATERAL[0]?.symbol ?? "");
@@ -552,6 +595,13 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet }: Co
   };
 
   return (
+    <>
+    <Strip cells={[
+      ["Supplied", fmt(L?.supplied ?? 0)],
+      ["Debt", fmt(debt)],
+      ["Collateral value", fmt(collVal)],
+      ["LTV used", collVal > 0 ? `${((debt / collVal) * 100).toFixed(1)}%` : "—"],
+    ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
         <h3>Earn — lend USDG</h3>
@@ -590,5 +640,7 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet }: Co
         </div>
       </div>
     </div>
+    <History acts={acts} address={wallet.address} fixed="Loan" title="Lending history" />
+    </>
   );
 }
