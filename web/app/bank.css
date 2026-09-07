@@ -85,13 +85,49 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bnum.sub .no { font-size: 13px; }
 
 /* ---------- menu banner ----------
-   The art is near-black, so it sits on the white page as one dark plate: a
-   thin dark border, no glow, and a green hairline along the foot to tie it to
-   the rest of the accent. It keeps its 4:1 crop at every width. */
-.bban { position: relative; margin-bottom: 22px; border-radius: 8px; overflow: hidden; border: 1px solid var(--ink); background: #06080a; }
-.bban img { display: block; width: 100%; height: auto; aspect-ratio: 2508 / 627; object-fit: cover; }
-.bban::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--em), transparent); }
-@media (max-width: 720px) { .bban img { aspect-ratio: 21 / 9; } }
+   Built rather than photographed, so it belongs to the page: paper, the same
+   engineering grid, a green motif bled off the right edge. The word animates
+   in a letter at a time and the rule wipes in under it. */
+.bban {
+  position: relative; overflow: hidden; margin-bottom: 22px;
+  border: 1px solid var(--line); border-left: 3px solid var(--em); border-radius: 8px;
+  padding: 30px 34px; min-height: 168px; display: flex; align-items: center;
+  background:
+    radial-gradient(120% 150% at 100% 50%, var(--em-soft) 0%, transparent 62%),
+    linear-gradient(105deg, #ffffff 0%, #fbfefc 55%, #f2faf6 100%);
+}
+/* the same grid as the page, only tighter, so the plate reads as a cutaway */
+.bban::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(100deg, transparent 8%, #000 42%);
+}
+@media (max-width: 620px) { .bban { padding: 22px 20px; min-height: 0; } }
+
+.bban-in { position: relative; z-index: 1; min-width: 0; }
+.bban-k { font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: .2em; color: var(--em-2); margin-bottom: 10px; animation: bfade .5s .05s both; }
+.bban-t { margin: 0; font-size: clamp(34px, 5.4vw, 54px); font-weight: 700; letter-spacing: -0.045em; line-height: 1; }
+.bban-t span { display: inline-block; animation: bchar .55s cubic-bezier(.22,1,.36,1) both; }
+.bban-rule { display: block; height: 2px; width: min(280px, 60%); margin: 16px 0 12px; border-radius: 2px; background: linear-gradient(90deg, var(--em), var(--em-line)); transform-origin: left; animation: bwipe .6s .34s cubic-bezier(.22,1,.36,1) both; }
+.bban-s { margin: 0; max-width: 60ch; font-size: 12.5px; line-height: 1.6; color: var(--dim); animation: bfade .6s .46s both; }
+
+@keyframes bchar { from { opacity: 0; transform: translateY(16px) rotate(-5deg); } }
+@keyframes bwipe { from { transform: scaleX(0); } }
+@keyframes bfade { from { opacity: 0; transform: translateY(6px); } }
+
+/* the motif: an oversized line icon bled off the right edge, still drawing */
+.bban-m { position: absolute; right: -14px; top: 50%; translate: 0 -50%; z-index: 0; color: var(--em); opacity: .17; }
+.bban-m .bani { width: 168px; height: 168px; animation: none; }
+.bban-m .bani path { stroke-width: 1.1; }
+@media (max-width: 760px) { .bban-m { display: none; } }
+
+/* one slow pass of light, the same gesture as the balance card */
+.bban-sweep {
+  position: absolute; top: 0; bottom: 0; left: -40%; width: 34%; z-index: 0; pointer-events: none;
+  background: linear-gradient(102deg, transparent, rgba(16,163,92,.09), transparent);
+  transform: skewX(-16deg); animation: bsheen 7s ease-in-out infinite;
+}
 
 /* a panel kicker — the mono micro-label above a block of content */
 .bpk { font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }

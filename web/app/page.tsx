@@ -37,8 +37,14 @@ const COLLATERAL = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 40);
 const TERMS: [string, number][] = [["30 days", 30 * 86400], ["90 days", 90 * 86400], ["180 days", 180 * 86400]];
 const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], ["Monthly", 30 * 86400]];
 
-/** The header banner each menu opens with; Live Stats runs without one. */
-const BANNER: Record<Tab, string> = { overview: "overview", save: "save", pay: "pay", borrow: "borrow", live: "" };
+/** The header plate each menu opens with: kicker, animated word, one honest line. */
+const BANNER: Record<Tab, { title: string; kicker: string; blurb: string; ico: string }> = {
+  overview: { title: "HoodSave", kicker: "NON-CUSTODIAL · RH CHAIN", blurb: "Your money sits in contracts you can read, and only your key moves it.", ico: "bank" },
+  save: { title: "Saving", kicker: "BACKED BY SGOV", blurb: "USDG buys short U.S. treasuries. The yield is the bill, not a promise.", ico: "save" },
+  pay: { title: "Pay", kicker: "ESCROWED · ON SCHEDULE", blurb: "Fund it once and it pays out on time. Cancel and the rest comes back.", ico: "send" },
+  borrow: { title: "Borrow", kicker: "AGAINST STOCK COLLATERAL", blurb: "Draw USDG against what you hold, up to half its value, without selling.", ico: "borrow" },
+  live: { title: "Live Stats", kicker: "READ FROM THE CHAIN", blurb: "Every figure below is a contract call, refreshed every fifteen seconds.", ico: "chart" },
+};
 
 /** Which part of the bank an event came from. */
 const GRP: Record<string, string> = {
@@ -158,13 +164,7 @@ export default function Page() {
       <main className="bwrap bmain">
         <div className="bnum"><span className="no">{NO[tab]}</span><h2>{HEAD[tab]}</h2><span className="rule" /></div>
 
-        {BANNER[tab] && (
-          // eslint-disable-next-line @next/next/no-img-element -- a plain static
-          // banner; next/image buys nothing for a single pre-sized asset.
-          <div className="bban">
-            <img src={`/banners/${BANNER[tab]}.jpg`} alt="" width={1800} height={450} />
-          </div>
-        )}
+        <Banner tab={tab} />
 
         {msg && <div className={`bnk-msg ${msg.ok ? "ok" : "err"}`} style={{ marginBottom: 16, marginTop: 0 }}>{msg.text}</div>}
 
@@ -326,6 +326,28 @@ function Ico({ k, i = 0 }: { k: string; i?: number }) {
       style={{ animationDelay: `${(i % 6) * 0.4}s` }} aria-hidden>
       <path d={IC[k] ?? IC.coin} pathLength={1} />
     </svg>
+  );
+}
+
+/** The plate under each menu title. The word animates in a letter at a time and
+ *  the key remounts it on every tab change, so switching menus replays it. */
+function Banner({ tab }: { tab: Tab }) {
+  const b = BANNER[tab];
+  return (
+    <div className="bban" key={tab}>
+      <span className="bban-sweep" aria-hidden />
+      <div className="bban-in">
+        <div className="bban-k">{b.kicker}</div>
+        <h2 className="bban-t" aria-label={b.title}>
+          {[...b.title].map((c, i) => (
+            <span key={`${c}${i}`} style={{ animationDelay: `${140 + i * 45}ms` }} aria-hidden>{c === " " ? " " : c}</span>
+          ))}
+        </h2>
+        <span className="bban-rule" aria-hidden />
+        <p className="bban-s">{b.blurb}</p>
+      </div>
+      <span className="bban-m" aria-hidden><Ico k={b.ico} /></span>
+    </div>
   );
 }
 
