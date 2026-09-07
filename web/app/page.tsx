@@ -37,6 +37,9 @@ const COLLATERAL = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 40);
 const TERMS: [string, number][] = [["30 days", 30 * 86400], ["90 days", 90 * 86400], ["180 days", 180 * 86400]];
 const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], ["Monthly", 30 * 86400]];
 
+/** The header banner each menu opens with; Live Stats runs without one. */
+const BANNER: Record<Tab, string> = { overview: "overview", save: "save", pay: "pay", borrow: "borrow", live: "" };
+
 /** Which part of the bank an event came from. */
 const GRP: Record<string, string> = {
   Deposited: "Savings", Withdrawn: "Savings",
@@ -154,6 +157,14 @@ export default function Page() {
 
       <main className="bwrap bmain">
         <div className="bnum"><span className="no">{NO[tab]}</span><h2>{HEAD[tab]}</h2><span className="rule" /></div>
+
+        {BANNER[tab] && (
+          // eslint-disable-next-line @next/next/no-img-element -- a plain static
+          // banner; next/image buys nothing for a single pre-sized asset.
+          <div className="bban">
+            <img src={`/banners/${BANNER[tab]}.jpg`} alt="" width={1800} height={450} />
+          </div>
+        )}
 
         {msg && <div className={`bnk-msg ${msg.ok ? "ok" : "err"}`} style={{ marginBottom: 16, marginTop: 0 }}>{msg.text}</div>}
 
