@@ -141,19 +141,19 @@ export default function Page() {
           )}
 
           {tab === "overview" && (
-            <div className="bstrip">
-              <div><span>Total balance</span><b>{fmt(total)}</b></div>
-              <div><span>Savings TVL</span><b>{fmt(stats?.savingsTvl ?? 0)}</b></div>
-              <div><span>Borrowed</span><b>{fmt(b?.loan?.debt ?? 0)}</b></div>
-              <div><span>SGOV price</span><b>{fmt(sgovPrice)}</b></div>
-            </div>
+            <Strip cells={[
+              ["Total balance", fmt(total), "wallet"],
+              ["Savings TVL", fmt(stats?.savingsTvl ?? 0), "bank"],
+              ["Borrowed", fmt(b?.loan?.debt ?? 0), "borrow"],
+              ["SGOV price", fmt(sgovPrice), "price"],
+            ]} />
           )}
 
           {tab === "overview" && (
             <div className="bover">
               {/* left: balance card + actions + activity */}
               <div>
-                <h2 className="bsec">Your account</h2>
+                <h2 className="bsec"><Ico k="wallet" />Your account</h2>
                 <div className="bbal">Total balance</div>
                 <div className="bbal-row"><span className="bbal-v">{fmt(total)}</span></div>
                 <div className="bcard">
@@ -165,18 +165,18 @@ export default function Page() {
                   <div className="meta"><span>Backed by SGOV</span><span>Balance {fmt(savingsVal)}</span></div>
                 </div>
                 <div className="bacts">
-                  <button className="bact primary" onClick={() => setTab("save")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>Deposit</button>
-                  <button className="bact" onClick={() => setTab("pay")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>Send</button>
-                  <button className="bact" onClick={() => setTab("borrow")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9 12 4l9 5M5 9v9h14V9" /></svg>Borrow</button>
+                  <button className="bact primary" onClick={() => setTab("save")}><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" pathLength={1} /></svg>Deposit</button>
+                  <button className="bact" onClick={() => setTab("pay")}><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" pathLength={1} /></svg>Send</button>
+                  <button className="bact" onClick={() => setTab("borrow")}><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9 12 4l9 5M5 9v9h14V9" pathLength={1} /></svg>Borrow</button>
                 </div>
-                <h2 className="bsec" style={{ fontSize: 15, marginTop: 8 }}>Recent activity</h2>
+                <h2 className="bsec" style={{ fontSize: 15, marginTop: 8 }}><Ico k="list" />Recent activity</h2>
                 {!wallet.address ? <div className="bnk-empty">Connect a wallet to see activity.</div> : (
                   <div>
-                    {savingsVal > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 6v12M6 12l6 6 6-6" /></svg></span><div className="id"><b>Savings balance</b><span>SGOV-backed</span></div><span className="amt up">{fmt(savingsVal)}</span></div>}
-                    {(b?.loan?.supplied ?? 0) > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16v10H4zM4 11h16" /></svg></span><div className="id"><b>Lending supplied</b><span>earning interest</span></div><span className="amt up">{fmt(b?.loan?.supplied ?? 0)}</span></div>}
-                    {(b?.loan?.debt ?? 0) > 0 && <div className="btx"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3 3 9v11h18V9z" /></svg></span><div className="id"><b>Borrowed</b><span>against collateral</span></div><span className="amt down">−{fmt(b?.loan?.debt ?? 0)}</span></div>}
+                    {savingsVal > 0 && <div className="btx"><span className="ic"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 6v12M6 12l6 6 6-6" pathLength={1} /></svg></span><div className="id"><b>Savings balance</b><span>SGOV-backed</span></div><span className="amt up">{fmt(savingsVal)}</span></div>}
+                    {(b?.loan?.supplied ?? 0) > 0 && <div className="btx"><span className="ic"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16v10H4zM4 11h16" pathLength={1} /></svg></span><div className="id"><b>Lending supplied</b><span>earning interest</span></div><span className="amt up">{fmt(b?.loan?.supplied ?? 0)}</span></div>}
+                    {(b?.loan?.debt ?? 0) > 0 && <div className="btx"><span className="ic"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3 3 9v11h18V9z" pathLength={1} /></svg></span><div className="id"><b>Borrowed</b><span>against collateral</span></div><span className="amt down">−{fmt(b?.loan?.debt ?? 0)}</span></div>}
                     {(b?.orders ?? []).slice(0, 4).map((o) => (
-                      <div className="btx" key={o.id}><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 12h14M12 5l7 7-7 7" /></svg></span><div className="id"><b>Pay → {short(o.recipient)}</b><span>every {Math.round(o.intervalS / 86400)}d · {o.open ? "active" : "done"}</span></div><span className="amt down">−{fmt(o.amount)}</span></div>
+                      <div className="btx" key={o.id}><span className="ic"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 12h14M12 5l7 7-7 7" pathLength={1} /></svg></span><div className="id"><b>Pay → {short(o.recipient)}</b><span>every {Math.round(o.intervalS / 86400)}d · {o.open ? "active" : "done"}</span></div><span className="amt down">−{fmt(o.amount)}</span></div>
                     ))}
                     {savingsVal === 0 && (b?.loan?.supplied ?? 0) === 0 && (b?.loan?.debt ?? 0) === 0 && (b?.orders ?? []).length === 0 && <div className="bnk-empty">Nothing yet — deposit to get started.</div>}
                   </div>
@@ -185,12 +185,12 @@ export default function Page() {
 
               {/* right: activity board */}
               <div className="bboard">
-                <h2 className="bsec">Highlighted</h2>
+                <h2 className="bsec"><Ico k="spark" />Highlighted</h2>
                 <div className="bhl">
-                  <div className="bhl-card"><span className="bhl-ic">S</span><div className="bhl-id"><b>Savings</b><span>SGOV</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(savingsVal)}</b><span>balance</span></div></div>
-                  <div className="bhl-card"><span className="bhl-ic">L</span><div className="bhl-id"><b>Lending</b><span>earn</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(b?.loan?.supplied ?? 0)}</b><span>supplied</span></div></div>
-                  <div className="bhl-card"><span className="bhl-ic">B</span><div className="bhl-id"><b>Borrowed</b><span>debt</span></div><div className="bhl-v" style={{ marginLeft: "auto" }}><b>{fmt(b?.loan?.debt ?? 0)}</b><span>owed</span></div></div>
-                  <div className="bhl-card"><span className="bhl-ic">$</span><div className="bhl-id"><b>SGOV</b><span>price</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(sgovPrice)}</b><span>now</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic"><Ico k="save" i={0} /></span><div className="bhl-id"><b>Savings</b><span>SGOV</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(savingsVal)}</b><span>balance</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic"><Ico k="lend" i={1} /></span><div className="bhl-id"><b>Lending</b><span>earn</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(b?.loan?.supplied ?? 0)}</b><span>supplied</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic"><Ico k="borrow" i={2} /></span><div className="bhl-id"><b>Borrowed</b><span>debt</span></div><div className="bhl-v" style={{ marginLeft: "auto" }}><b>{fmt(b?.loan?.debt ?? 0)}</b><span>owed</span></div></div>
+                  <div className="bhl-card"><span className="bhl-ic"><Ico k="coin" i={3} /></span><div className="bhl-id"><b>SGOV</b><span>price</span></div><span className="bhl-spark"><Spark points={sgovSeries} /></span><div className="bhl-v"><b>{fmt(sgovPrice)}</b><span>now</span></div></div>
                 </div>
 
                 <CandleChart symbol="SGOV" />
@@ -215,7 +215,7 @@ export default function Page() {
               <>
                 <div className="bnk-grid" style={{ marginTop: 22 }}>
                   <div className="bnk-card">
-                    <h3>Your allocation</h3>
+                    <h3><Ico k="chart" />Your allocation</h3>
                     <p className="sub">Where every dollar sits right now.</p>
                     <div className="balloc">
                       <Donut parts={alloc} />
@@ -236,12 +236,12 @@ export default function Page() {
                   </div>
 
                   <div className="bnk-card">
-                    <h3>Quick actions</h3>
+                    <h3><Ico k="spark" />Quick actions</h3>
                     <p className="sub">Everything the bank can do, one tap away.</p>
                     <div className="bicons">
                       {QUICK.map(([label, to, d]) => (
                         <button className="bico" key={label} onClick={() => setTab(to as Tab)}>
-                          <span className="bico-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg></span>
+                          <span className="bico-i"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} pathLength={1} /></svg></span>
                           <span>{label}</span>
                         </button>
                       ))}
@@ -275,9 +275,38 @@ type Common = {
 
 const EXPLORER_URL = "https://robinhoodchain.blockscout.com";
 
+/** Line-icon paths, keyed by meaning. Single path each so one draw loop fits all. */
+const IC: Record<string, string> = {
+  save: "M12 3v11M7.5 9.5l4.5 4.5 4.5-4.5M4 20h16",
+  lock: "M7.5 10.5V8a4.5 4.5 0 019 0v2.5M5.5 10.5h13v9.5h-13z",
+  send: "M4 12h13M11.5 5.5L19 12l-7.5 6.5",
+  clock: "M12 21a9 9 0 100-18 9 9 0 000 18M12 7v5.2l3.4 2",
+  lend: "M4 7h16v10H4zM4 11h16M7.5 14.5h3.5",
+  borrow: "M3 9l9-5 9 5M5 9v10h14V9M9.5 19v-5h5v5",
+  price: "M3 16.5l5-6 4 3 5-7 3.5 2.5",
+  bank: "M12 3.5 3.5 8h17zM6 8v9M10 8v9M14 8v9M18 8v9M3 20.5h18",
+  wallet: "M4 6.5h13a2 2 0 012 2v9a2 2 0 01-2 2H4zM4 6.5v-2h11M16.5 13h2",
+  chart: "M3 12h4l2.5-6.5L13.5 18 16 12h5",
+  list: "M4 7h16M4 12h16M4 17h10",
+  coin: "M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17M12 7.5v9M9.6 10.2c0-1 1.1-1.7 2.4-1.7s2.4.7 2.4 1.7-1.1 1.5-2.4 1.9-2.4.9-2.4 1.9 1.1 1.7 2.4 1.7 2.4-.7 2.4-1.7",
+  shield: "M12 3.5l7 3v5.5c0 4-3 6.8-7 9-4-2.2-7-5-7-9V6.5z",
+  users: "M8.5 11a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4M2.5 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M16.5 11.5a2.6 2.6 0 100-5.2M17 14.4c2.6.3 4.5 2.3 4.5 5.1",
+  spark: "M12 3.5l2.2 5.1 5.3.6-4 3.7 1.1 5.3-4.6-2.7-4.6 2.7L8 12.9l-4-3.7 5.3-.6z",
+};
+
+/** A line icon that redraws itself forever. `i` staggers a grid so it ripples. */
+function Ico({ k, i = 0 }: { k: string; i?: number }) {
+  return (
+    <svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      style={{ animationDelay: `${(i % 6) * 0.4}s` }} aria-hidden>
+      <path d={IC[k] ?? IC.coin} pathLength={1} />
+    </svg>
+  );
+}
+
 /** The divided stat rail every tab opens with. */
-function Strip({ cells }: { cells: [string, string][] }) {
-  return <div className="bstrip">{cells.map(([k, v]) => <div key={k}><span>{k}</span><b>{v}</b></div>)}</div>;
+function Strip({ cells }: { cells: [string, string, string][] }) {
+  return <div className="bstrip">{cells.map(([k, v, ic], i) => <div key={k}><span><Ico k={ic} i={i} />{k}</span><b>{v}</b></div>)}</div>;
 }
 
 /** Searchable activity table. `fixed` pins it to one part of the bank and
@@ -292,7 +321,7 @@ function History({ acts, address, fixed, title = "History" }: { acts: StatAct[];
 
   return (
     <>
-      <h2 className="bsec" style={{ marginTop: 26 }}>{title}<span className="sp" /><span className="bnk-tag open">● live</span></h2>
+      <h2 className="bsec" style={{ marginTop: 26 }}><Ico k="list" />{title}<span className="sp" /><span className="bnk-tag open">● live</span></h2>
       <div className="bnk-card">
         <div className="bhist-tools">
           <label className="bsearch">
@@ -343,7 +372,7 @@ function LiveTab({ fmt, s }: { fmt: (n: number) => string; s: Stats | null }) {
 
       <div className="bnk-grid">
         <div className="bnk-card">
-          <h3>Protocol</h3>
+          <h3><Ico k="bank" />Protocol</h3>
           <p className="sub">Read straight from the three bank contracts, refreshed every 15 seconds.</p>
           <div className="bnk-kv"><span>Savings TVL</span><b>{fmt(s.savingsTvl)}</b></div>
           <div className="bnk-kv"><span>Lending reserve</span><b>{fmt(s.lendingReserve)}</b></div>
@@ -356,12 +385,12 @@ function LiveTab({ fmt, s }: { fmt: (n: number) => string; s: Stats | null }) {
         </div>
 
         <div className="bnk-card">
-          <h3>Live activity</h3>
+          <h3><Ico k="chart" />Live activity</h3>
           <p className="sub">Every deposit, payment, borrow and repayment across the bank.</p>
           {s.activity.length === 0 ? <div className="bnk-empty">No on-chain activity yet.</div>
             : s.activity.map((a, i) => (
               <a className="btx" key={a.tx + i} href={`${EXPLORER_URL}/tx/${a.tx}`} target="_blank" rel="noreferrer">
-                <span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 12h4l2.5-6 4 12 2.5-6h5" /></svg></span>
+                <span className="ic"><svg className="bani" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 12h4l2.5-6 4 12 2.5-6h5" pathLength={1} /></svg></span>
                 <div className="id"><b>{a.detail}</b><span>{a.user ? short(a.user) : "—"} · block {a.block}</span></div>
                 <span className="amt">{a.kind}</span>
               </a>
@@ -415,14 +444,14 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
   return (
     <>
     <Strip cells={[
-      ["Free balance", fmt(free)],
-      ["Locked", fmt(locked)],
-      ["Unlocks", locked > 0 && unlockAt > 0 ? new Date(unlockAt * 1000).toLocaleDateString() : "—"],
-      ["SGOV price", fmt(sgovPrice)],
+      ["Free balance", fmt(free), "save"],
+      ["Locked", fmt(locked), "lock"],
+      ["Unlocks", locked > 0 && unlockAt > 0 ? new Date(unlockAt * 1000).toLocaleDateString() : "-", "clock"],
+      ["SGOV price", fmt(sgovPrice), "price"],
     ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
-        <h3>Savings</h3>
+        <h3><Ico k="save" />Savings</h3>
         <p className="sub">Your USDG is held as SGOV — short U.S. treasuries — so the balance grows on its own. Withdraw the free part any time.</p>
         <div className="bnk-kv"><span>Free balance</span><b>{fmt(free)}</b></div>
         <div className="bnk-kv"><span>Locked balance</span><b>{fmt(locked)}{unlockAt > 0 && locked > 0 ? ` · until ${new Date(unlockAt * 1000).toLocaleDateString()}` : ""}</b></div>
@@ -435,7 +464,7 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
       </div>
 
       <div className="bnk-card">
-        <h3>Deposit</h3>
+        <h3><Ico k="coin" />Deposit</h3>
         <p className="sub">{deployed ? "Add USDG to your savings." : "The savings vault isn't deployed yet — this opens once it is."}</p>
         <div className="bnk-seg">
           <button className={mode === "open" ? "on" : ""} onClick={() => setMode("open")}>Flexible</button>
@@ -495,14 +524,14 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet, acts }: Commo
   return (
     <>
     <Strip cells={[
-      ["Active orders", String(open.length)],
-      ["Escrowed", fmt(open.reduce((s, o) => s + o.remaining, 0))],
-      ["Next payment", nextDue ? new Date(nextDue * 1000).toLocaleDateString() : "—"],
-      ["Per cycle", fmt(open.reduce((s, o) => s + o.amount, 0))],
+      ["Active orders", String(open.length), "list"],
+      ["Escrowed", fmt(open.reduce((s, o) => s + o.remaining, 0)), "shield"],
+      ["Next payment", nextDue ? new Date(nextDue * 1000).toLocaleDateString() : "-", "clock"],
+      ["Per cycle", fmt(open.reduce((s, o) => s + o.amount, 0)), "send"],
     ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
-        <h3>New standing order</h3>
+        <h3><Ico k="clock" />New standing order</h3>
         <p className="sub">{deployed ? "Escrow USDG and it pays out on schedule — rent, salary, an allowance. Cancel any time, the rest comes back." : "Payments aren't deployed yet."}</p>
         <div className="bnk-field"><div className="bnk-fk"><span>Recipient address</span></div><div className="bnk-inp"><input placeholder="0x…" value={to} onChange={(e) => setTo(e.target.value)} style={{ fontSize: 13 }} /></div></div>
         <div className="bnk-row2">
@@ -514,7 +543,7 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet, acts }: Commo
       </div>
 
       <div className="bnk-card">
-        <h3>Your orders</h3>
+        <h3><Ico k="list" />Your orders</h3>
         <p className="sub">Scheduled payments from this wallet.</p>
         {!wallet.address ? <div className="bnk-empty">Connect a wallet to see your orders.</div>
           : orders.length === 0 ? <div className="bnk-empty">No standing orders yet.</div>
@@ -597,14 +626,14 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
   return (
     <>
     <Strip cells={[
-      ["Supplied", fmt(L?.supplied ?? 0)],
-      ["Debt", fmt(debt)],
-      ["Collateral value", fmt(collVal)],
-      ["LTV used", collVal > 0 ? `${((debt / collVal) * 100).toFixed(1)}%` : "—"],
+      ["Supplied", fmt(L?.supplied ?? 0), "lend"],
+      ["Debt", fmt(debt), "borrow"],
+      ["Collateral value", fmt(collVal), "shield"],
+      ["LTV used", collVal > 0 ? `${((debt / collVal) * 100).toFixed(1)}%` : "-", "chart"],
     ]} />
     <div className="bnk-grid">
       <div className="bnk-card">
-        <h3>Earn — lend USDG</h3>
+        <h3><Ico k="lend" />Earn - lend USDG</h3>
         <p className="sub">{deployed ? `Supply USDG for borrowers to draw against; you earn the ~${BORROW_APR}% borrow interest.` : "Lending isn't deployed yet."}</p>
         <div className="bnk-kv"><span>Your supplied</span><b>{fmt(L?.supplied ?? 0)}</b></div>
         <div className="bnk-field" style={{ marginTop: 12 }}><div className="bnk-fk"><span>Supply</span>{usdg > 0 && <button onClick={() => setSup(String(Math.floor(usdg * 100) / 100))}>MAX</button>}</div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={sup} onChange={(e) => setSup(e.target.value)} /><span className="unit">USDG</span></div></div>
@@ -618,7 +647,7 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
       </div>
 
       <div className="bnk-card">
-        <h3>Borrow against stocks</h3>
+        <h3><Ico k="borrow" />Borrow against stocks</h3>
         <p className="sub">{deployed ? `Post a stock as collateral and borrow up to ${MAX_LTV_BPS / 100}% of its value — without selling.` : "Borrowing isn't deployed yet."}</p>
         {collVal > 0 && (
           <>

@@ -292,6 +292,26 @@ html:has(.bnk), html:has(.bnk) body { background: #070807; }
 .bico:hover { transform: translateY(-2px); border-color: var(--em-deep); background: rgba(74,222,128,.06); }
 .bico-i { width: 34px; height: 34px; border-radius: 11px; background: rgba(74,222,128,.1); color: var(--em-2); display: grid; place-items: center; transition: transform .2s cubic-bezier(.22,1,.36,1); }
 .bico-i svg { width: 17px; height: 17px; }
+
+/* ---------- looping line icons ----------
+   pathLength="1" on every path makes the dash cycle length-independent, so one
+   keyframe draws any icon. The delay is set inline per icon and inherited by
+   the path so a grid of them ripples instead of blinking in lockstep. */
+.bani { width: 17px; height: 17px; flex: none; overflow: visible; animation: bfloat 4s ease-in-out infinite; animation-delay: inherit; }
+.bani path, .bani circle { stroke-dasharray: 1; animation: bdraw 4s ease-in-out infinite; animation-delay: inherit; }
+@keyframes bdraw { 0% { stroke-dashoffset: 1; } 38%, 62% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; } }
+@keyframes bfloat { 50% { transform: translateY(-1.5px); } }
+@media (prefers-reduced-motion: reduce) { .bani, .bani path, .bani circle { animation: none; stroke-dashoffset: 0; } }
+
+.bhl-ic .bani { width: 18px; height: 18px; }
+.btx .ic .bani { width: 15px; height: 15px; }
+.bnk-card h3 { display: flex; align-items: center; gap: 8px; }
+.bnk-card h3 .bani { width: 18px; height: 18px; color: var(--em-2); }
+.bsec .bani { width: 16px; height: 16px; color: var(--em-2); }
+/* these already own their transform on hover — keep the draw, drop the float */
+.bact .bani, .bico-i .bani { animation: none; }
+.bstrip span { display: flex; align-items: center; gap: 6px; }
+.bstrip .bani { width: 13px; height: 13px; color: var(--em-2); }
 .bico:hover .bico-i { transform: scale(1.1) rotate(-4deg); }
 
 /* ---------- history table ---------- */
