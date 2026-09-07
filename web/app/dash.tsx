@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Point } from "./api/chart/route.ts";
 
-const UP = "#4ade80", DOWN = "#f0616d", GREY = "#3a463c";
+const UP = "#10a35c", DOWN = "#d4384a", GREY = "#93a49a";
 
 /** A mini line sparkline for the highlighted tiles. */
 export function Spark({ points, w = 120, h = 30 }: { points: Point[] | null; w?: number; h?: number }) {
@@ -27,15 +27,15 @@ export function Donut({ parts, size = 148 }: { parts: { label: string; value: nu
   let acc = 0;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden style={{ flex: "none" }}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#1b1e1a" strokeWidth={15} />
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#eef3f0" strokeWidth={15} />
       {total > 0 && live.map((p) => {
         const frac = p.value / total, dash = frac * C;
         const el = <circle key={p.label} cx={cx} cy={cx} r={r} fill="none" stroke={p.color} strokeWidth={15}
           strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={-acc * C} transform={`rotate(-90 ${cx} ${cx})`} />;
         acc += frac; return el;
       })}
-      <text x={cx} y={cx - 1} textAnchor="middle" fontSize="21" fontWeight="700" fill="#f3f5f2">{live.length}</text>
-      <text x={cx} y={cx + 15} textAnchor="middle" fontSize="9.5" fill="#9aa39a">buckets</text>
+      <text x={cx} y={cx - 1} textAnchor="middle" fontSize="21" fontWeight="700" fill="#0b1a12">{live.length}</text>
+      <text x={cx} y={cx + 15} textAnchor="middle" fontSize="9.5" fill="#93a49a">buckets</text>
     </svg>
   );
 }
@@ -89,10 +89,10 @@ export function CandleChart({ symbol = "SGOV" }: { symbol?: string }) {
         : (
           <svg className="bchart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
             {ticks.map((t) => (
-              <g key={t}><line x1={PAD} y1={y(t)} x2={W - AX + 4} y2={y(t)} stroke="#1b1e1a" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                <text x={W - AX + 8} y={y(t) + 3} fontSize="10" fill="#67706a">${t.toFixed(t >= 100 ? 0 : 2)}</text></g>
+              <g key={t}><line x1={PAD} y1={y(t)} x2={W - AX + 4} y2={y(t)} stroke="#eef3f0" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                <text x={W - AX + 8} y={y(t) + 3} fontSize="10" fill="#93a49a">${t.toFixed(t >= 100 ? 0 : 2)}</text></g>
             ))}
-            <line x1={PAD} y1={y(last)} x2={W - AX + 4} y2={y(last)} stroke="#4ade80" strokeOpacity=".4" strokeDasharray="3 5" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <line x1={PAD} y1={y(last)} x2={W - AX + 4} y2={y(last)} stroke="#10a35c" strokeOpacity=".45" strokeDasharray="3 5" strokeWidth="1" vectorEffect="non-scaling-stroke" />
             {candles.map((c, i) => {
               const rising = c.c >= c.o, col = rising ? UP : DOWN, cx = PAD + i * slot + slot / 2, bw = Math.max(3, slot * 0.6);
               return <g key={i}><line x1={cx} y1={y(c.h)} x2={cx} y2={y(c.l)} stroke={col} strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
