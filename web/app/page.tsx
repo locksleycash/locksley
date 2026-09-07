@@ -12,6 +12,7 @@ import {
 } from "../src/bank.ts";
 import type { BankOrder } from "./api/bank/route.ts";
 import { CandleChart, Donut, Spark, useSgovSeries } from "./dash.tsx";
+import { StockLogo } from "./logo.tsx";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const SLIP = 0.99; // 1% floor on the SGOV swaps
@@ -321,10 +322,13 @@ function Ico({ k, i = 0 }: { k: string; i?: number }) {
 // Nothing below is a native control: <select> and the number spinners are
 // replaced so every menu behaves the same on every browser.
 
+/** One row of a Pick: value, label, and optionally a mark and a second line. */
+interface Opt { v: string; l: string; icon?: React.ReactNode; sub?: string }
+
 /** A dropdown that isn't the browser's: popover list, optional filter for long
  *  lists, closes on outside click or Escape. */
 function Pick({ value, onChange, options, disabled, search }: {
-  value: string; onChange: (v: string) => void; options: [string, string][]; disabled?: boolean; search?: boolean;
+  value: string; onChange: (v: string) => void; options: Opt[]; disabled?: boolean; search?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -339,13 +343,14 @@ function Pick({ value, onChange, options, disabled, search }: {
     return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", key); };
   }, [open]);
 
-  const label = options.find(([v]) => v === value)?.[1] ?? value;
-  const list = q ? options.filter(([v, l]) => `${v} ${l}`.toLowerCase().includes(q.toLowerCase())) : options;
+  const sel = options.find((o) => o.v === value);
+  const list = q ? options.filter((o) => `${o.v} ${o.l} ${o.sub ?? ""}`.toLowerCase().includes(q.toLowerCase())) : options;
 
   return (
     <div className={`bpick${open ? " open" : ""}`} ref={box}>
       <button type="button" className="bpick-b" disabled={disabled} onClick={() => { setOpen(!open); setQ(""); }}>
-        <span>{label}</span>
+        {sel?.icon}
+        <span>{sel?.l ?? value}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       {open && (
@@ -354,10 +359,11 @@ function Pick({ value, onChange, options, disabled, search }: {
             <input className="bpick-q" autoFocus placeholder="Filter…" value={q} onChange={(e) => setQ(e.target.value)} />
           )}
           <div className="bpick-l">
-            {list.length === 0 ? <div className="bpick-e">Nothing matches.</div> : list.map(([v, l]) => (
-              <button type="button" key={v} className={v === value ? "on" : ""} onClick={() => { onChange(v); setOpen(false); }}>
-                <span>{l}</span>
-                {v === value && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg>}
+            {list.length === 0 ? <div className="bpick-e">Nothing matches.</div> : list.map((o) => (
+              <button type="button" key={o.v} className={o.v === value ? "on" : ""} onClick={() => { onChange(o.v); setOpen(false); }}>
+                {o.icon}
+                <span>{o.l}{o.sub && <i>{o.sub}</i>}</span>
+                {o.v === value && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg>}
               </button>
             ))}
           </div>
@@ -595,7 +601,7 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
         {mode === "locked" && (
           <div className="bnk-field">
             <div className="bnk-fk"><span>Lock term</span></div>
-            <Pick value={String(term)} onChange={(v) => setTerm(Number(v))} options={TERMS.map(([l, s]) => [String(s), l])} />
+            <Pick value={String(term)} onChange={(v) => setTerm(Number(v))} options={TERMS.map(([l, s]) => ({ v: String(s), l }))} />
           </div>
         )}
         <button className="bnk-btn wide" disabled={!deployed || !wallet.address || !!busy || amt <= 0 || amt > usdg + 1e-9} onClick={deposit}>{busy ?? (!wallet.address ? "Connect wallet" : mode === "locked" ? "Lock & deposit" : "Deposit")}</button>
@@ -656,7 +662,7 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet, acts }: Commo
           <div className="bnk-field"><div className="bnk-fk"><span>Amount each</span></div><Amt value={amount} onChange={setAmount} unit="USDG" /></div>
           <div className="bnk-field"><div className="bnk-fk"><span>Payments</span></div><Step value={count} onChange={setCount} min={1} unit="×" /></div>
         </div>
-        <div className="bnk-field"><div className="bnk-fk"><span>Every</span></div><Pick value={String(interval)} onChange={(v) => setInterval_(Number(v))} options={INTERVALS.map(([l, s]) => [String(s), l])} /></div>
+        <div className="bnk-field"><div className="bnk-fk"><span>Every</span></div><Pick value={String(interval)} onChange={(v) => setInterval_(Number(v))} options={INTERVALS.map(([l, s]) => ({ v: String(s), l }))} /></div>
         <button className="bnk-btn wide" disabled={!deployed || !wallet.address || !!busy || !valid} onClick={create}>{busy ?? (!wallet.address ? "Connect wallet" : `Escrow ${fmt(amt * n)} & schedule`)}</button>
       </div>
 
@@ -769,7 +775,7 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
         <p className="sub">{deployed ? `Post a stock as collateral and borrow up to ${MAX_LTV_BPS / 100}% of its value — without selling.` : "Borrowing isn't deployed yet."}</p>
         {collVal > 0 && (
           <>
-            <div className="bnk-kv"><span>Collateral{L?.collateral ? ` · ${L.collateral} shares` : ""}</span><b>{fmt(collVal)}</b></div>
+            <div className="bnk-kv"><span className="kvi">{coll && <StockLogo symbol={coll.symbol} address={coll.address} size={18} />}Collateral{L?.collateral ? ` · ${L.collateral} shares` : ""}</span><b>{fmt(collVal)}</b></div>
             <div className="bnk-kv"><span>Debt</span><b>{fmt(debt)}</b></div>
             <div className="bnk-kv"><span>Borrowable left</span><b>{fmt(Math.max(0, maxBorrow - debt))}</b></div>
             <div className="bnk-health"><span style={{ width: `${healthPct}%`, background: healthColor }} /></div>
@@ -777,7 +783,7 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
           </>
         )}
         <div className="bnk-row2" style={{ marginTop: 12 }}>
-          <div className="bnk-field"><div className="bnk-fk"><span>Collateral</span></div><Pick search value={collSym} onChange={setCollSym} disabled={!!L?.collateral && L.collToken.toLowerCase() !== (coll?.address.toLowerCase() ?? "")} options={COLLATERAL.map((s) => [s.symbol, s.symbol])} /></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Collateral</span></div><Pick search value={collSym} onChange={setCollSym} disabled={!!L?.collateral && L.collToken.toLowerCase() !== (coll?.address.toLowerCase() ?? "")} options={COLLATERAL.map((s) => ({ v: s.symbol, l: s.symbol, sub: s.name, icon: <StockLogo symbol={s.symbol} address={s.address} size={22} /> }))} /></div>
           <div className="bnk-field"><div className="bnk-fk"><span>Shares</span></div><Amt value={collAmt} onChange={setCollAmt} placeholder="0.0" /></div>
         </div>
         <button className="bnk-btn ghost wide" disabled={!deployed || !wallet.address || !!busy || !(Number(collAmt) > 0)} onClick={addCollateral}>{busy ?? "Add collateral"}</button>

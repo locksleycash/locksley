@@ -300,6 +300,14 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
   font-size: 13.5px; font-weight: 500; text-align: left; transition: background .13s, color .13s;
 }
 .bpick-l button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* the company name under the ticker */
+.bpick-l button span i { display: block; font-style: normal; font-size: 10.5px; font-weight: 400; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bpick-l button:hover span i, .bpick-l button.on span i { color: var(--dim); }
+
+/* stock marks: a round coin wherever a ticker is named */
+.bpick .logo, .bnk-kv .logo { border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+.bpick-b .logo { margin-right: 2px; }
+.bnk-kv .kvi { display: inline-flex; align-items: center; gap: 8px; }
 .bpick-l button svg { width: 14px; height: 14px; flex: none; color: var(--em); }
 .bpick-l button:hover { background: var(--em-soft); color: var(--em-2); }
 .bpick-l button.on { background: var(--em-soft); color: var(--em-2); font-weight: 600; }
