@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { encodeFunctionData, parseUnits } from "viem";
 import { useWallet } from "./wallet.ts";
 import { makeFormat } from "../src/money.ts";
@@ -317,6 +317,111 @@ function Ico({ k, i = 0 }: { k: string; i?: number }) {
   );
 }
 
+// -------------------------------------------------- form widgets
+// Nothing below is a native control: <select> and the number spinners are
+// replaced so every menu behaves the same on every browser.
+
+/** A dropdown that isn't the browser's: popover list, optional filter for long
+ *  lists, closes on outside click or Escape. */
+function Pick({ value, onChange, options, disabled, search }: {
+  value: string; onChange: (v: string) => void; options: [string, string][]; disabled?: boolean; search?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const box = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", key); };
+  }, [open]);
+
+  const label = options.find(([v]) => v === value)?.[1] ?? value;
+  const list = q ? options.filter(([v, l]) => `${v} ${l}`.toLowerCase().includes(q.toLowerCase())) : options;
+
+  return (
+    <div className={`bpick${open ? " open" : ""}`} ref={box}>
+      <button type="button" className="bpick-b" disabled={disabled} onClick={() => { setOpen(!open); setQ(""); }}>
+        <span>{label}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div className="bpick-m">
+          {search && (
+            <input className="bpick-q" autoFocus placeholder="Filter…" value={q} onChange={(e) => setQ(e.target.value)} />
+          )}
+          <div className="bpick-l">
+            {list.length === 0 ? <div className="bpick-e">Nothing matches.</div> : list.map(([v, l]) => (
+              <button type="button" key={v} className={v === value ? "on" : ""} onClick={() => { onChange(v); setOpen(false); }}>
+                <span>{l}</span>
+                {v === value && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Segmented toggle whose indicator slides between the options. */
+function Seg({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: [string, string][] }) {
+  const i = Math.max(0, options.findIndex(([v]) => v === value));
+  return (
+    <div className="bnk-seg" style={{ "--n": options.length, "--i": i } as React.CSSProperties}>
+      <span className="bnk-seg-i" />
+      {options.map(([v, l]) => (
+        <button type="button" key={v} className={v === value ? "on" : ""} onClick={() => onChange(v)}>{l}</button>
+      ))}
+    </div>
+  );
+}
+
+const PCT: [string, number][] = [["25%", 0.25], ["50%", 0.5], ["75%", 0.75], ["MAX", 1]];
+
+/** Number field with the native spinners gone; when a ceiling is known it also
+ *  offers the four fill shortcuts. */
+function Amt({ value, onChange, unit, max, step = "any", placeholder = "0.00" }: {
+  value: string; onChange: (v: string) => void; unit?: string; max?: number; step?: string; placeholder?: string;
+}) {
+  const cur = Number(value) || 0;
+  return (
+    <>
+      <div className="bnk-inp">
+        <input type="number" min="0" step={step} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+        {unit && <span className="unit">{unit}</span>}
+      </div>
+      {!!max && max > 0 && (
+        <div className="bpct">
+          {PCT.map(([l, f]) => {
+            const v = Math.floor(max * f * 100) / 100;
+            return <button type="button" key={l} className={cur > 0 && Math.abs(cur - v) < 0.005 ? "on" : ""} onClick={() => onChange(String(v))}>{l}</button>;
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Whole-number field with its own −/+ instead of the browser's spinner. */
+function Step({ value, onChange, min = 0, max = 9999, unit }: {
+  value: string; onChange: (v: string) => void; min?: number; max?: number; unit?: string;
+}) {
+  const n = Number(value) || 0;
+  const bump = (d: number) => onChange(String(Math.min(max, Math.max(min, n + d))));
+  return (
+    <div className="bnk-inp step">
+      <button type="button" className="stepb" disabled={n <= min} onClick={() => bump(-1)} aria-label="Less">−</button>
+      <input type="number" min={min} step="1" value={value} onChange={(e) => onChange(e.target.value)} />
+      {unit && <span className="unit">{unit}</span>}
+      <button type="button" className="stepb" disabled={n >= max} onClick={() => bump(1)} aria-label="More">+</button>
+    </div>
+  );
+}
+
 /** The divided stat rail every tab opens with. */
 function Strip({ cells }: { cells: [string, string, string][] }) {
   return <div className="bstrip">{cells.map(([k, v, ic], i) => <div key={k}><span><Ico k={ic} i={i} />{k}</span><b>{v}</b></div>)}</div>;
@@ -473,8 +578,8 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
         <div className="bnk-kv"><span>Locked balance</span><b>{fmt(locked)}{unlockAt > 0 && locked > 0 ? ` · until ${new Date(unlockAt * 1000).toLocaleDateString()}` : ""}</b></div>
         <div className="bnk-kv"><span>Yield source</span><b>SGOV t-bills</b></div>
         <div style={{ marginTop: 16 }}>
-          <div className="bnk-fk"><span>Withdraw (USDG)</span>{free > 0 && <button onClick={() => setWamount(String(Math.floor(free * 100) / 100))}>MAX {fmt(free)}</button>}</div>
-          <div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={wamount} onChange={(e) => setWamount(e.target.value)} /><span className="unit">USDG</span></div>
+          <div className="bnk-fk"><span>Withdraw (USDG)</span>{free > 0 && <span className="cap">{fmt(free)} free</span>}</div>
+          <Amt value={wamount} onChange={setWamount} unit="USDG" max={free} />
           <button className="bnk-btn ghost wide" style={{ marginTop: 10 }} disabled={!deployed || !wallet.address || !!busy || !(Number(wamount) > 0)} onClick={withdraw}>{busy ?? "Withdraw"}</button>
         </div>
       </div>
@@ -482,18 +587,15 @@ function SaveTab({ b, fmt, usdg, sgovPrice, busy, setBusy, send, done, fail, wal
       <div className="bpane">
         <h3><Ico k="coin" />Deposit</h3>
         <p className="sub">{deployed ? "Add USDG to your savings." : "The savings vault isn't deployed yet — this opens once it is."}</p>
-        <div className="bnk-seg">
-          <button className={mode === "open" ? "on" : ""} onClick={() => setMode("open")}>Flexible</button>
-          <button className={mode === "locked" ? "on" : ""} onClick={() => setMode("locked")}>Locked</button>
-        </div>
+        <Seg value={mode} onChange={(v) => setMode(v as "open" | "locked")} options={[["open", "Flexible"], ["locked", "Locked"]]} />
         <div className="bnk-field">
-          <div className="bnk-fk"><span>Amount</span>{usdg > 0 && <button onClick={() => setAmount(String(Math.floor(usdg * 100) / 100))}>MAX {fmt(usdg)}</button>}</div>
-          <div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} /><span className="unit">USDG</span></div>
+          <div className="bnk-fk"><span>Amount</span>{usdg > 0 && <span className="cap">{fmt(usdg)} in wallet</span>}</div>
+          <Amt value={amount} onChange={setAmount} unit="USDG" max={usdg} />
         </div>
         {mode === "locked" && (
           <div className="bnk-field">
             <div className="bnk-fk"><span>Lock term</span></div>
-            <div className="bnk-inp"><select value={term} onChange={(e) => setTerm(Number(e.target.value))}>{TERMS.map(([l, s]) => <option key={s} value={s}>{l}</option>)}</select></div>
+            <Pick value={String(term)} onChange={(v) => setTerm(Number(v))} options={TERMS.map(([l, s]) => [String(s), l])} />
           </div>
         )}
         <button className="bnk-btn wide" disabled={!deployed || !wallet.address || !!busy || amt <= 0 || amt > usdg + 1e-9} onClick={deposit}>{busy ?? (!wallet.address ? "Connect wallet" : mode === "locked" ? "Lock & deposit" : "Deposit")}</button>
@@ -551,10 +653,10 @@ function PayTab({ b, fmt, busy, setBusy, send, done, fail, wallet, acts }: Commo
         <p className="sub">{deployed ? "Escrow USDG and it pays out on schedule — rent, salary, an allowance. Cancel any time, the rest comes back." : "Payments aren't deployed yet."}</p>
         <div className="bnk-field"><div className="bnk-fk"><span>Recipient address</span></div><div className="bnk-inp"><input placeholder="0x…" value={to} onChange={(e) => setTo(e.target.value)} style={{ fontSize: 13 }} /></div></div>
         <div className="bnk-row2">
-          <div className="bnk-field"><div className="bnk-fk"><span>Amount each</span></div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} /><span className="unit">USDG</span></div></div>
-          <div className="bnk-field"><div className="bnk-fk"><span>Payments</span></div><div className="bnk-inp"><input type="number" min="1" step="1" value={count} onChange={(e) => setCount(e.target.value)} /><span className="unit">×</span></div></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Amount each</span></div><Amt value={amount} onChange={setAmount} unit="USDG" /></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Payments</span></div><Step value={count} onChange={setCount} min={1} unit="×" /></div>
         </div>
-        <div className="bnk-field"><div className="bnk-fk"><span>Every</span></div><div className="bnk-inp"><select value={interval} onChange={(e) => setInterval_(Number(e.target.value))}>{INTERVALS.map(([l, s]) => <option key={s} value={s}>{l}</option>)}</select></div></div>
+        <div className="bnk-field"><div className="bnk-fk"><span>Every</span></div><Pick value={String(interval)} onChange={(v) => setInterval_(Number(v))} options={INTERVALS.map(([l, s]) => [String(s), l])} /></div>
         <button className="bnk-btn wide" disabled={!deployed || !wallet.address || !!busy || !valid} onClick={create}>{busy ?? (!wallet.address ? "Connect wallet" : `Escrow ${fmt(amt * n)} & schedule`)}</button>
       </div>
 
@@ -652,11 +754,11 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
         <h3><Ico k="lend" />Earn - lend USDG</h3>
         <p className="sub">{deployed ? `Supply USDG for borrowers to draw against; you earn the ~${BORROW_APR}% borrow interest.` : "Lending isn't deployed yet."}</p>
         <div className="bnk-kv"><span>Your supplied</span><b>{fmt(L?.supplied ?? 0)}</b></div>
-        <div className="bnk-field" style={{ marginTop: 12 }}><div className="bnk-fk"><span>Supply</span>{usdg > 0 && <button onClick={() => setSup(String(Math.floor(usdg * 100) / 100))}>MAX</button>}</div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={sup} onChange={(e) => setSup(e.target.value)} /><span className="unit">USDG</span></div></div>
+        <div className="bnk-field" style={{ marginTop: 12 }}><div className="bnk-fk"><span>Supply</span>{usdg > 0 && <span className="cap">{fmt(usdg)} in wallet</span>}</div><Amt value={sup} onChange={setSup} unit="USDG" max={usdg} /></div>
         <button className="bnk-btn wide" disabled={!deployed || !wallet.address || !!busy || !(Number(sup) > 0)} onClick={supply}>{busy ?? "Supply"}</button>
         {(L?.supplied ?? 0) > 0 && (
           <>
-            <div className="bnk-field" style={{ marginTop: 12 }}><div className="bnk-fk"><span>Redeem</span><button onClick={() => setRed(String(Math.floor((L?.supplied ?? 0) * 100) / 100))}>MAX</button></div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={red} onChange={(e) => setRed(e.target.value)} /><span className="unit">USDG</span></div></div>
+            <div className="bnk-field" style={{ marginTop: 12 }}><div className="bnk-fk"><span>Redeem</span><span className="cap">{fmt(L?.supplied ?? 0)} supplied</span></div><Amt value={red} onChange={setRed} unit="USDG" max={L?.supplied ?? 0} /></div>
             <button className="bnk-btn ghost wide" disabled={!!busy || !(Number(red) > 0)} onClick={redeem}>{busy ?? "Redeem"}</button>
           </>
         )}
@@ -675,13 +777,13 @@ function BorrowTab({ b, fmt, usdg, busy, setBusy, send, done, fail, wallet, acts
           </>
         )}
         <div className="bnk-row2" style={{ marginTop: 12 }}>
-          <div className="bnk-field"><div className="bnk-fk"><span>Collateral</span></div><div className="bnk-inp"><select value={collSym} onChange={(e) => setCollSym(e.target.value)} disabled={!!L?.collateral && L.collToken.toLowerCase() !== (coll?.address.toLowerCase() ?? "")}>{COLLATERAL.map((s) => <option key={s.symbol} value={s.symbol}>{s.symbol}</option>)}</select></div></div>
-          <div className="bnk-field"><div className="bnk-fk"><span>Shares</span></div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.0" value={collAmt} onChange={(e) => setCollAmt(e.target.value)} /></div></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Collateral</span></div><Pick search value={collSym} onChange={setCollSym} disabled={!!L?.collateral && L.collToken.toLowerCase() !== (coll?.address.toLowerCase() ?? "")} options={COLLATERAL.map((s) => [s.symbol, s.symbol])} /></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Shares</span></div><Amt value={collAmt} onChange={setCollAmt} placeholder="0.0" /></div>
         </div>
         <button className="bnk-btn ghost wide" disabled={!deployed || !wallet.address || !!busy || !(Number(collAmt) > 0)} onClick={addCollateral}>{busy ?? "Add collateral"}</button>
         <div className="bnk-row2" style={{ marginTop: 12 }}>
-          <div className="bnk-field"><div className="bnk-fk"><span>Borrow</span></div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={borrowAmt} onChange={(e) => setBorrowAmt(e.target.value)} /><span className="unit">USDG</span></div><button className="bnk-btn wide" style={{ marginTop: 8 }} disabled={!deployed || !!busy || !(Number(borrowAmt) > 0)} onClick={borrow}>{busy ?? "Borrow"}</button></div>
-          <div className="bnk-field"><div className="bnk-fk"><span>Repay</span>{debt > 0 && <button onClick={() => setRepayAmt(String(Math.ceil(debt * 100) / 100))}>ALL</button>}</div><div className="bnk-inp"><input type="number" min="0" step="any" placeholder="0.00" value={repayAmt} onChange={(e) => setRepayAmt(e.target.value)} /><span className="unit">USDG</span></div><button className="bnk-btn ghost wide" style={{ marginTop: 8 }} disabled={!!busy || !(Number(repayAmt) > 0)} onClick={repay}>{busy ?? "Repay"}</button></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Borrow</span></div><Amt value={borrowAmt} onChange={setBorrowAmt} unit="USDG" max={Math.max(0, maxBorrow - debt)} /><button className="bnk-btn wide" style={{ marginTop: 8 }} disabled={!deployed || !!busy || !(Number(borrowAmt) > 0)} onClick={borrow}>{busy ?? "Borrow"}</button></div>
+          <div className="bnk-field"><div className="bnk-fk"><span>Repay</span>{debt > 0 && <span className="cap">{fmt(debt)} owed</span>}</div><Amt value={repayAmt} onChange={setRepayAmt} unit="USDG" max={debt} /><button className="bnk-btn ghost wide" style={{ marginTop: 8 }} disabled={!!busy || !(Number(repayAmt) > 0)} onClick={repay}>{busy ?? "Repay"}</button></div>
         </div>
       </div>
     </div>
