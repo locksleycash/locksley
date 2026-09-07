@@ -39,7 +39,7 @@ const INTERVALS: [string, number][] = [["Daily", 86400], ["Weekly", 7 * 86400], 
 
 /** The header plate each menu opens with: kicker, animated word, one honest line. */
 const BANNER: Record<Tab, { title: string; kicker: string; blurb: string; ico: string }> = {
-  overview: { title: "HoodSave", kicker: "NON-CUSTODIAL · RH CHAIN", blurb: "Your money sits in contracts you can read, and only your key moves it.", ico: "bank" },
+  overview: { title: "Locksley", kicker: "NON-CUSTODIAL · RH CHAIN", blurb: "Your money sits in contracts you can read, and only your key moves it.", ico: "bank" },
   save: { title: "Saving", kicker: "BACKED BY SGOV", blurb: "USDG buys short U.S. treasuries. The yield is the bill, not a promise.", ico: "save" },
   pay: { title: "Pay", kicker: "ESCROWED · ON SCHEDULE", blurb: "Fund it once and it pays out on time. Cancel and the rest comes back.", ico: "send" },
   borrow: { title: "Borrow", kicker: "AGAINST STOCK COLLATERAL", blurb: "Draw USDG against what you hold, up to half its value, without selling.", ico: "borrow" },
@@ -134,8 +134,11 @@ export default function Page() {
       <header className="btop">
         <div className="bwrap btop-in">
           <span className="btop-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg>
-            HOODSAVE<i className="cur" />
+            {/* a padlock whose shackle is drawn as a bow — the name, twice over */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 10.5V8a5 5 0 0110 0v2.5" /><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M12 14v3.5" />
+            </svg>
+            LOCKSLEY<i className="cur" />
           </span>
           <nav className="btabs">
             {NAV.map(([t, l]) => (
@@ -177,7 +180,7 @@ export default function Page() {
                 <div className="bbal-v">{fmt(total)}</div>
                 <div className="bcard">
                   <span className="visa">SAVE</span>
-                  <span className="tag">HoodSave · Savings</span>
+                  <span className="tag">Locksley · Savings</span>
                   <span className="sp" />
                   <div className="nm">{wallet.address ? "Your vault" : "Not connected"}</div>
                   <div className="no">{wallet.address ? `${wallet.address.slice(2, 6)}  ${wallet.address.slice(6, 10)}  ${wallet.address.slice(10, 14)}  ${wallet.address.slice(-4)}` : "•••• •••• •••• ••••"}</div>
@@ -263,7 +266,7 @@ export default function Page() {
             {showHow && (
               <div className="bwork">
                 <button className="bwork-x" onClick={() => setShowHow(false)} aria-label="Dismiss">×</button>
-                <div className="bwork-k">How HoodSave works</div>
+                <div className="bwork-k">How Locksley works</div>
                 <div className="bwork-steps">
                   {[
                     ["Deposit USDG", "Your cash buys SGOV — short U.S. treasuries — held in the vault under your name."],

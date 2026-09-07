@@ -25,7 +25,7 @@ const poppins = Poppins({
 // pairing its name with a wallet prompt is what a phishing classifier is built
 // to catch Ã¢â‚¬â€ which is exactly what happened. The network is still named where
 // it is technically necessary, such as switching a wallet to it.
-const TITLE = "HoodSave - non-custodial banking on RH Chain";
+const TITLE = "Locksley - non-custodial banking on RH Chain";
 const DESCRIPTION = "Savings backed by treasuries, scheduled payments, and borrow against your stocks - all on-chain, non-custodial, no fees.";
 
 /**
@@ -47,10 +47,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: TITLE,
   description: DESCRIPTION,
-  applicationName: "HoodSave",
+  applicationName: "Locksley",
   openGraph: {
     type: "website",
-    siteName: "HoodSave",
+    siteName: "Locksley",
     title: TITLE,
     description: DESCRIPTION,
     url: "/",
