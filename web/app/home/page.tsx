@@ -65,6 +65,7 @@ export default function Home() {
 
         <header className="hal-hero">
           <div className="hal-card">
+            <video className="hal-vid" src="/media/hero.mp4" autoPlay muted loop playsInline preload="metadata" aria-hidden />
             <div className="hal-hero-in">
               <h1 className="hal-h1">Your cash<br />keeps working</h1>
               <p className="hal-sub">
@@ -138,6 +139,7 @@ export default function Home() {
           </div>
 
           <div className="hal-panel" id="borrow">
+            <video className="hal-vid" src="/media/uses.mp4" autoPlay muted loop playsInline preload="metadata" aria-hidden />
             <div className="hal-panel-in">
               <h3>Standing orders</h3>
               <p>
