@@ -102,10 +102,10 @@ export default function Page() {
   const NAV: [Tab, string][] = [["overview", "OVERVIEW"], ["save", "SAVE"], ["pay", "PAY"], ["borrow", "BORROW"], ["live", "LIVE"]];
 
   const alloc = [
-    { label: "Savings", value: b?.savings?.freeValue ?? 0, color: "#2b2644" },
-    { label: "Locked", value: b?.savings?.lockedValue ?? 0, color: "#4b4370" },
-    { label: "Lending", value: b?.loan?.supplied ?? 0, color: "#8f89ab" },
-    { label: "Wallet USDG", value: usdg, color: "#cfccd9" },
+    { label: "Savings", value: b?.savings?.freeValue ?? 0, color: "#4b3f7d" },
+    { label: "Locked", value: b?.savings?.lockedValue ?? 0, color: "#7568b4" },
+    { label: "Lending", value: b?.loan?.supplied ?? 0, color: "#a99edb" },
+    { label: "Wallet USDG", value: usdg, color: "#ded8f0" },
   ];
   const allocSum = alloc.reduce((s, p) => s + p.value, 0);
 
