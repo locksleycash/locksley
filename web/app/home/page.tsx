@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { STOCKS } from "../../src/stocks.ts";
 import { poolFor } from "../../src/pools.ts";
+import { StockLogo } from "../logo.tsx";
 import "./home.css";
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ const Mark = () => (
 
 /** Tickers accepted as collateral. Real symbols off the catalogue, so the rail
  *  states a fact rather than borrowing someone else's logo. */
-const TICKERS = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 12).map((s) => s.symbol);
+const TICKERS = STOCKS.filter((s) => poolFor.has(s.symbol)).slice(0, 12);
 
 /** What the bank is actually built on. Each of these is a dependency we call,
  *  never a backer or a partner - saying otherwise would be a lie. */
@@ -76,8 +77,11 @@ export default function Home() {
 
               <div className="hal-marq hero" aria-hidden>
                 <div className="hal-marq-track">
-                  {[...TICKERS, ...TICKERS].map((t, i) => (
-                    <span key={`${t}${i}`} style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }}>{t}</span>
+                  {[...TICKERS, ...TICKERS].map((s, i) => (
+                    <span key={`${s.symbol}${i}`}>
+                      <StockLogo symbol={s.symbol} address={s.address} size={22} eager={i < 8} />
+                      {s.symbol}
+                    </span>
                   ))}
                 </div>
               </div>

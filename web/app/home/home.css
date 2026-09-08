@@ -76,7 +76,14 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 @media (prefers-reduced-motion: reduce) {
   .hal-marq-track { animation: none !important; }
 }
-.hal-marq.hero span { margin: 0 28px; flex: none; white-space: nowrap; color: rgba(0,0,0,.6); }
+/* each ticker rides with its own mark, so the rail reads as real holdings */
+.hal-marq.hero span {
+  margin: 0 20px; flex: none; white-space: nowrap; color: rgba(0,0,0,.72);
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+}
+.hal-marq.hero .logo { border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+.hal-marq.hero { max-width: 34rem; }
 .hal-marq.backers span { margin: 0 40px; flex: none; white-space: nowrap; color: rgba(0,0,0,.5); }
 @media (max-width: 780px) { .hal-marq.hero { margin-top: 40px; } }
 
