@@ -1,30 +1,36 @@
-/* Locksley — a white-and-green neobank console, matched to the StocksPilot
-   house style: paper background under a faint engineering grid, crisp hairline
-   borders, monospace for the terminal furniture (micro-labels, stat rails,
-   table heads) and Poppins for everything a human reads. Emerald is the only
-   accent. Scoped to .bnk. */
+/* Locksley app console, sharing the landing page's palette: an #F5F5F5
+   ground under a faint engineering grid, white cards, black type, black as
+   the interactive accent and #2B2644 for every dark surface. Monospace is
+   reserved for terminal furniture - micro-labels, the status rail, table
+   heads - and Poppins carries everything a human reads. Scoped to .bnk. */
 
-html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
+html:has(.bnk), html:has(.bnk) body { background: #f5f5f5; }
 
 .bnk {
-  --paper: #ffffff;
+  /* Matched to the landing: #F5F5F5 ground, black type and black as the
+     interactive accent, with the landing's #2B2644 carrying every dark
+     surface. Green survives only where it means something - a rising number,
+     a live feed - because black cannot say "up" and "down". */
+  --paper: #f5f5f5;
   --panel: #ffffff;
-  --panel-2: #f5f9f7;
-  --grid: #eef3f0;
-  --line: #e4eae7;
-  --line-soft: #edf2ef;
-  --ink: #0b1a12;
-  --dim: #5d6d64;
-  --faint: #93a49a;
-  --em: #10a35c;
-  --em-2: #0b7d46;
-  --em-deep: #8fd9b5;
-  --em-soft: #eafaf1;
-  --em-line: #c9ecdb;
+  --panel-2: #f0eff4;
+  --grid: #ebebeb;
+  --line: #e2e2e6;
+  --line-soft: #ededef;
+  --ink: #000000;
+  --dim: #3f3f46;
+  --faint: #8b8b93;
+  --em: #000000;
+  --em-2: #2b2644;
+  --em-deep: #b6b2c6;
+  --em-soft: #f0eff4;
+  --em-line: #d9d7e2;
   --em-ink: #ffffff;
+  --deep: #2b2644;
+  --live: #10a35c; /* the only green left: live feeds and rising figures */
   --up: #10a35c; --down: #d4384a;
   --amber: #d99a1f; --rose: #d4384a; /* the loan health bar */
-  --grad: linear-gradient(135deg, #12b768 0%, #0e9a56 48%, #0a7a44 100%);
+  --grad: linear-gradient(135deg, #3d355e 0%, #2b2644 52%, #1d1930 100%);
   --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
 
   background: var(--paper); color: var(--ink); min-height: 100vh;
@@ -41,7 +47,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bwrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 @media (max-width: 620px) { .bwrap { padding: 0 16px; } }
 
-.btop { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.btop { position: sticky; top: 0; z-index: 50; background: rgba(245,245,245,.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .btop-in { display: flex; align-items: center; gap: 20px; padding: 14px 28px; }
 @media (max-width: 620px) { .btop-in { padding: 12px 16px; } }
 .btop-logo { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--mono); font-size: 14.5px; font-weight: 700; letter-spacing: .1em; }
@@ -64,14 +70,14 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bnk-usdg b { color: var(--ink); font-weight: 600; }
 @media (max-width: 760px) { .bnk-usdg { display: none; } }
 
-.btick { border-bottom: 1px solid var(--line); background: var(--em-soft); }
+.btick { border-bottom: 1px solid var(--line); background: #ffffff; }
 .btick .row { display: flex; align-items: center; gap: 26px; padding: 9px 28px; font-family: var(--mono); font-size: 11px; letter-spacing: .07em; color: var(--dim); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
 .btick .row::-webkit-scrollbar { display: none; }
 @media (max-width: 620px) { .btick .row { padding: 9px 16px; gap: 18px; } }
 .btick .gt { color: var(--em); font-weight: 700; }
 .btick b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .btick .sp { flex: 1; }
-.btick .lv { color: var(--em-2); animation: blive 1.8s ease-in-out infinite; }
+.btick .lv { color: var(--live); animation: blive 1.8s ease-in-out infinite; }
 
 .bmain { min-width: 0; padding-top: 30px; padding-bottom: 90px; }
 
@@ -86,15 +92,15 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 
 /* ---------- menu banner ----------
    Built rather than photographed, so it belongs to the page: paper, the same
-   engineering grid, a green motif bled off the right edge. The word animates
+   engineering grid, an ink motif bled off the right edge. The word animates
    in a letter at a time and the rule wipes in under it. */
 .bban {
   position: relative; overflow: hidden; margin-bottom: 22px;
   border: 1px solid var(--line); border-left: 3px solid var(--em); border-radius: 8px;
   padding: 30px 34px; min-height: 168px; display: flex; align-items: center;
   background:
-    radial-gradient(120% 150% at 100% 50%, var(--em-soft) 0%, transparent 62%),
-    linear-gradient(105deg, #ffffff 0%, #fbfefc 55%, #f2faf6 100%);
+    radial-gradient(120% 150% at 100% 50%, #eceaf2 0%, transparent 62%),
+    linear-gradient(105deg, #ffffff 0%, #fcfcfd 55%, #f3f2f7 100%);
 }
 /* the same grid as the page, only tighter, so the plate reads as a cutaway */
 .bban::before {
@@ -125,7 +131,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 /* one slow pass of light, the same gesture as the balance card */
 .bban-sweep {
   position: absolute; top: 0; bottom: 0; left: -40%; width: 34%; z-index: 0; pointer-events: none;
-  background: linear-gradient(102deg, transparent, rgba(16,163,92,.09), transparent);
+  background: linear-gradient(102deg, transparent, rgba(43,38,68,.07), transparent);
   transform: skewX(-16deg); animation: bsheen 7s ease-in-out infinite;
 }
 
@@ -141,7 +147,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bbal-v { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .bbal-v i { font-style: normal; font-size: 15px; color: var(--dim); }
 
-.bcard { position: relative; border-radius: 18px; padding: 22px; background: var(--grad); color: #fff; overflow: hidden; box-shadow: 0 26px 50px -28px rgba(11,122,68,.85); min-height: 190px; display: flex; flex-direction: column; }
+.bcard { position: relative; border-radius: 18px; padding: 22px; background: var(--grad); color: #fff; overflow: hidden; box-shadow: 0 26px 50px -28px rgba(43,38,68,.7); min-height: 190px; display: flex; flex-direction: column; }
 .bcard::after { content: ""; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.3), transparent 65%); }
 .bcard .visa { position: absolute; top: 20px; right: 22px; font-family: var(--mono); font-size: 15px; font-weight: 700; letter-spacing: .14em; }
 .bcard .tag { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
@@ -156,7 +162,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bact svg { width: 15px; height: 15px; color: var(--em); }
 .bact.primary { background: var(--em); border-color: var(--em); color: var(--em-ink); }
 .bact.primary svg { color: var(--em-ink); }
-.bact.primary:hover { background: var(--em-2); border-color: var(--em-2); box-shadow: 0 8px 20px -10px rgba(16,163,92,.7); }
+.bact.primary:hover { background: var(--em-2); border-color: var(--em-2); box-shadow: 0 8px 20px -10px rgba(43,38,68,.5); }
 
 /* transactions list */
 .btx { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
@@ -222,7 +228,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bboard2 { display: grid; grid-template-columns: 1.55fr 1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; margin-bottom: 22px; }
 @media (max-width: 940px) { .bboard2 { grid-template-columns: 1fr; } }
 .bboard2-l { padding: 6px; }
-.bboard2-r { padding: 22px 24px; box-shadow: -1px 0 0 var(--line); display: flex; flex-direction: column; background: linear-gradient(180deg, #fbfdfc, #f4faf7); }
+.bboard2-r { padding: 22px 24px; box-shadow: -1px 0 0 var(--line); display: flex; flex-direction: column; background: #fafafb; }
 @media (max-width: 940px) { .bboard2-r { box-shadow: 0 -1px 0 var(--line); } }
 .bboard2-cta { margin-top: auto; padding-top: 14px; }
 /* the chart drops its own card chrome inside the slab */
@@ -247,7 +253,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bsplit { display: grid; grid-template-columns: 1fr 1fr; border: 1.5px solid var(--ink); border-radius: 6px; background: #fff; }
 @media (max-width: 820px) { .bsplit { grid-template-columns: 1fr; } }
 .bsplit > .bpane { border: 0; border-radius: 0; overflow: visible; box-shadow: -1px 0 0 var(--line); background: #fff; }
-.bsplit > .bpane:first-child { box-shadow: none; border-radius: 5px 0 0 5px; background: linear-gradient(180deg, #fbfdfc, #f4faf7); }
+.bsplit > .bpane:first-child { box-shadow: none; border-radius: 5px 0 0 5px; background: #fafafb; }
 .bsplit > .bpane:last-child { border-radius: 0 5px 5px 0; }
 @media (max-width: 820px) {
   .bsplit > .bpane:first-child { border-radius: 5px 5px 0 0; }
@@ -277,7 +283,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bnk-seg-i {
   position: absolute; top: 4px; bottom: 4px; left: 4px; z-index: 0;
   width: calc((100% - 8px) / var(--n)); transform: translateX(calc(100% * var(--i)));
-  background: var(--em); border-radius: 7px; box-shadow: 0 6px 14px -8px rgba(16,163,92,.9);
+  background: var(--em); border-radius: 7px; box-shadow: 0 6px 14px -8px rgba(43,38,68,.55);
   transition: transform .28s cubic-bezier(.22,1,.36,1);
 }
 .bnk-seg button { position: relative; z-index: 1; flex: 1; border: 0; background: transparent; color: var(--dim); font-size: 12.5px; font-weight: 600; padding: 8px; border-radius: 7px; transition: color .2s ease; }
@@ -332,7 +338,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bpick-m {
   position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0;
   border: 1.5px solid var(--em-line); border-radius: 11px; background: #fff; overflow: hidden;
-  box-shadow: 0 22px 44px -20px rgba(11,26,18,.28);
+  box-shadow: 0 22px 44px -20px rgba(0,0,0,.2);
   animation: bdrop .18s cubic-bezier(.22,1,.36,1);
 }
 @keyframes bdrop { from { opacity: 0; transform: translateY(-6px) scale(.985); } }
@@ -359,7 +365,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bpick-e { padding: 18px 12px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--faint); }
 .bnk-note { font-size: 11.5px; color: var(--dim); line-height: 1.55; margin: 10px 0 0; }
 .bnk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 11px; border: 1.5px solid var(--em); background: var(--em); color: var(--em-ink); font-size: 13px; font-weight: 700; transition: background .16s, box-shadow .16s, transform .1s; }
-.bnk-btn:hover { background: var(--em-2); border-color: var(--em-2); box-shadow: 0 8px 20px -10px rgba(16,163,92,.7); }
+.bnk-btn:hover { background: var(--em-2); border-color: var(--em-2); box-shadow: 0 8px 20px -10px rgba(43,38,68,.5); }
 .bnk-btn:active { transform: translateY(1px); }
 .bnk-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 .bnk-btn.ghost { background: #fff; color: var(--em-2); border-color: var(--line); }
@@ -367,7 +373,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bnk-btn.wide { width: 100%; height: 46px; }
 .bnk-btn.sm { height: 36px; padding: 0 14px; border-radius: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; }
 .bnk-msg { border-radius: 11px; padding: 11px 14px; font-size: 12.5px; margin-top: 12px; }
-.bnk-msg.ok { background: var(--em-soft); color: var(--em-2); border: 1px solid var(--em-line); }
+.bnk-msg.ok { background: rgba(16,163,92,.09); color: #0b7d46; border: 1px solid rgba(16,163,92,.22); }
 .bnk-msg.err { background: #fdeef0; color: #b3283a; border: 1px solid #f6ccd2; }
 .bnk-kv { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
 .bnk-kv:last-child { border-bottom: 0; }
@@ -382,7 +388,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bnk-order .cancel { border: 1px solid var(--line); background: #fff; color: var(--dim); font-size: 11px; font-weight: 600; padding: 6px 11px; border-radius: 8px; transition: all .16s; }
 .bnk-order .cancel:hover { color: var(--down); border-color: #f0b7bf; background: #fdeef0; }
 .bnk-tag { font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; }
-.bnk-tag.open { background: var(--em-soft); color: var(--em-2); border: 1px solid var(--em-line); }
+.bnk-tag.open { background: rgba(16,163,92,.1); color: var(--live); border: 1px solid rgba(16,163,92,.24); }
 .bnk-tag.done { background: var(--panel-2); color: var(--faint); border: 1px solid var(--line); }
 .bnk-empty { padding: 26px 10px; text-align: center; color: var(--faint); font-family: var(--mono); font-size: 12px; }
 .bnk-big { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
@@ -398,7 +404,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 /* one surface treatment: paper with the faintest green wash toward the foot */
 .bpane, .bchart, .bhl-card, .bwork, .bstrip {
   position: relative; overflow: hidden;
-  background: linear-gradient(170deg, #ffffff 0%, #fbfdfc 58%, #f4faf7 100%);
+  background: #ffffff;
 }
 .bpane::before, .bchart::before, .bhl-card::before {
   content: ""; position: absolute; inset: 0 0 auto; height: 2px; pointer-events: none;
@@ -410,7 +416,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 }
 .bpane:hover, .bhl-card:hover, .bchart:hover {
   transform: translateY(-2px); border-color: var(--em-line);
-  box-shadow: 0 22px 44px -30px rgba(11,122,68,.55);
+  box-shadow: 0 22px 44px -30px rgba(43,38,68,.38);
 }
 
 /* the active tab's underline breathes so the eye finds it */
@@ -485,7 +491,7 @@ html:has(.bnk), html:has(.bnk) body { background: #ffffff; }
 .bicons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 @media (max-width: 560px) { .bicons { grid-template-columns: repeat(3, 1fr); } }
 .bico { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 11px; font-weight: 600; transition: transform .18s cubic-bezier(.22,1,.36,1), border-color .18s, background .18s, box-shadow .18s; }
-.bico:hover { transform: translateY(-2px); border-color: var(--em-line); background: var(--em-soft); box-shadow: 0 14px 26px -20px rgba(11,122,68,.6); }
+.bico:hover { transform: translateY(-2px); border-color: var(--em-line); background: var(--em-soft); box-shadow: 0 14px 26px -20px rgba(43,38,68,.4); }
 .bico-i { width: 34px; height: 34px; border-radius: 11px; background: var(--em-soft); color: var(--em-2); display: grid; place-items: center; transition: transform .2s cubic-bezier(.22,1,.36,1), background .18s; }
 .bico:hover .bico-i { transform: scale(1.1) rotate(-4deg); background: #fff; }
 .bico-i svg { width: 17px; height: 17px; }
