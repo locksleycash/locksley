@@ -1,0 +1,168 @@
+/* Locksley landing — the premium-fintech composition: a transparent nav over a
+   full-bleed hero card, a marquee of real tickers, a card grid, a "built on"
+   row and a use-case panel. Paper is #F5F5F5 with black type and the same
+   emerald accent the app uses. Scoped to .hal so the app's own theme is
+   untouched. Plain CSS: this project has no Tailwind, and the design needs
+   none. */
+
+html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
+
+.hal {
+  --paper: #f5f5f5;
+  --ink: #000000;
+  --em: #10a35c;
+  --em-2: #0b7d46;
+  --deep: #0e2b1c;
+  display: flex; flex-direction: column;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.hal *, .hal *::before, .hal *::after { box-sizing: border-box; }
+.hal a { color: inherit; text-decoration: none; }
+.hal button { font-family: inherit; cursor: pointer; }
+.hal-in { max-width: 88rem; margin: 0 auto; width: 100%; }
+
+/* ---------- shared: the black pill with a white arrow disc ---------- */
+.hal-pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: #000; color: #fff; border: 0; border-radius: 999px;
+  padding: 8px 8px 8px 32px; font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+  transition: background .2s ease;
+}
+.hal-pill:hover { background: #1f1f1f; }
+.hal-pill i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: #fff; color: #000; transition: transform .22s cubic-bezier(.22,1,.36,1); }
+.hal-pill:hover i { transform: translateX(3px); }
+.hal-pill svg { width: 18px; height: 18px; }
+@media (max-width: 620px) { .hal-pill { font-size: 15px; padding-left: 24px; } }
+
+/* ---------- 1. nav ---------- */
+.hal-top { position: absolute; top: 0; left: 0; right: 0; z-index: 20; padding: 20px 24px; }
+.hal-top-in { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.hal-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 600; letter-spacing: -0.03em; }
+.hal-brand svg { width: 28px; height: 28px; }
+.hal-nav { display: flex; gap: 32px; }
+@media (max-width: 900px) { .hal-nav { display: none; } }
+.hal-nav a { font-size: 16px; font-weight: 500; color: #3f3f46; transition: color .2s ease; }
+.hal-nav a:hover { color: #000; }
+.hal-cta { background: #000; color: #fff; border: 0; border-radius: 999px; padding: 10px 28px; font-size: 16px; font-weight: 500; transition: background .2s ease; }
+.hal-cta:hover { background: #1f1f1f; }
+
+/* ---------- 2. hero ---------- */
+.hal-first { height: 100svh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.hal-hero { flex: 1; display: flex; align-items: flex-end; padding: 80px 24px 24px; }
+.hal-card {
+  position: relative; width: 100%; height: calc(100svh - 96px); border-radius: 24px; overflow: hidden;
+  /* the art is drawn, not fetched: a slow emerald aurora over paper */
+  background:
+    radial-gradient(60% 80% at 18% 22%, rgba(16,163,92,.30), transparent 62%),
+    radial-gradient(55% 70% at 78% 30%, rgba(11,125,70,.26), transparent 60%),
+    radial-gradient(70% 90% at 60% 105%, rgba(14,43,28,.30), transparent 65%),
+    linear-gradient(150deg, #eef3f0 0%, #dfeee6 48%, #cfe6da 100%);
+}
+/* one drifting light, so the panel is never quite still */
+.hal-card::before {
+  content: ""; position: absolute; inset: -30%;
+  background: radial-gradient(closest-side, rgba(255,255,255,.55), transparent 70%);
+  animation: hal-drift 18s ease-in-out infinite alternate;
+}
+@keyframes hal-drift { from { transform: translate(-12%, 6%) scale(1); } to { transform: translate(14%, -8%) scale(1.18); } }
+/* the same engineering grid the app uses, so the two feel like one product */
+.hal-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(rgba(11,26,18,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,26,18,.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(80% 80% at 50% 40%, #000, transparent 78%);
+}
+
+.hal-hero-in { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: flex-start; height: 100%; padding: 48px; padding-top: 144px; }
+@media (max-width: 780px) { .hal-hero-in { padding: 28px; padding-top: 108px; } }
+.hal-h1 { margin: 0 0 16px; font-size: clamp(40px, 7vw, 60px); font-weight: 600; line-height: 1.08; letter-spacing: -0.04em; max-width: 36rem; }
+.hal-sub { margin: 0 0 32px; max-width: 30rem; font-size: 17px; line-height: 1.65; color: rgba(0,0,0,.7); }
+@media (max-width: 620px) { .hal-sub { font-size: 15px; } }
+
+/* ---------- marquees ---------- */
+.hal-marq { overflow: hidden; width: 100%; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.hal-marq-track { display: flex; width: max-content; }
+.hal-marq.hero { margin-top: 96px; max-width: 28rem; }
+.hal-marq.hero .hal-marq-track { animation: hal-marq 22s linear infinite; }
+.hal-marq.backers .hal-marq-track { animation: hal-marq 30s linear infinite; }
+@keyframes hal-marq { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .hal-marq-track { animation: none !important; }
+  .hal-card::before { animation: none; }
+}
+.hal-marq.hero span { margin: 0 28px; flex: none; white-space: nowrap; color: rgba(0,0,0,.6); }
+.hal-marq.backers span { margin: 0 40px; flex: none; white-space: nowrap; color: rgba(0,0,0,.5); }
+@media (max-width: 780px) { .hal-marq.hero { margin-top: 40px; } }
+
+/* ---------- 3. info ---------- */
+.hal-sec { padding: 96px 24px; }
+.hal-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; margin-bottom: 64px; }
+@media (max-width: 900px) { .hal-row2 { grid-template-columns: 1fr; gap: 32px; } }
+.hal-h2 { margin: 0 0 32px; font-size: clamp(32px, 4.4vw, 48px); font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; }
+.hal-lede { margin: 0; font-size: clamp(20px, 2.4vw, 30px); line-height: 1.5; letter-spacing: -0.02em; color: rgba(0,0,0,.7); }
+
+.hal-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 1080px) { .hal-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .hal-cards { grid-template-columns: 1fr; } }
+.hal-c { border-radius: 24px; padding: 28px; min-height: 320px; display: flex; flex-direction: column; justify-content: space-between; }
+.hal-c h3 { margin: 0; font-size: 24px; font-weight: 600; line-height: 1.28; letter-spacing: -0.02em; }
+.hal-c p { margin: 0; font-size: 16px; line-height: 1.6; max-width: 22rem; }
+.hal-c.wide { grid-column: span 2; }
+@media (max-width: 620px) { .hal-c.wide { grid-column: span 1; } }
+/* the wide card carries the art; again drawn rather than fetched */
+.hal-c.art {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(70% 90% at 22% 18%, rgba(16,163,92,.34), transparent 60%),
+    radial-gradient(60% 80% at 88% 88%, rgba(14,43,28,.28), transparent 62%),
+    linear-gradient(140deg, #e9f4ee 0%, #d6ebdf 100%);
+}
+.hal-c.art h3, .hal-c.art p { position: relative; z-index: 1; }
+.hal-c.art p { color: rgba(0,0,0,.7); }
+.hal-c.dark { background: var(--deep); }
+.hal-c.dark h3 { color: #fff; }
+.hal-c.dark p { color: rgba(255,255,255,.6); }
+
+/* ---------- 4. built on ---------- */
+.hal-built { padding: 0 24px 24px; }
+.hal-built-in { display: grid; grid-template-columns: 1fr 3fr; gap: 32px; align-items: center; }
+@media (max-width: 900px) { .hal-built-in { grid-template-columns: 1fr; gap: 20px; } }
+.hal-built p { margin: 0; font-size: 16px; line-height: 1.6; color: rgba(0,0,0,.7); }
+
+/* ---------- 5. use cases ---------- */
+.hal-eyebrow { font-size: 14px; color: rgba(0,0,0,.6); margin-bottom: 8px; }
+.hal-h2.big { font-size: clamp(40px, 6vw, 60px); line-height: 1; letter-spacing: -0.04em; margin-bottom: 24px; }
+.hal-uses { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+@media (max-width: 900px) { .hal-uses { grid-template-columns: 1fr; } }
+.hal-uses-l { padding-right: 48px; padding-top: 8px; }
+@media (max-width: 900px) { .hal-uses-l { padding-right: 0; } }
+.hal-uses-l p { margin: 0; font-size: 16px; line-height: 1.6; max-width: 24rem; color: rgba(0,0,0,.6); }
+.hal-panel {
+  position: relative; border-radius: 28px; overflow: hidden; min-height: 720px;
+  background:
+    radial-gradient(65% 75% at 80% 14%, rgba(16,163,92,.32), transparent 60%),
+    radial-gradient(70% 80% at 12% 96%, rgba(14,43,28,.30), transparent 62%),
+    linear-gradient(160deg, #edf5f1 0%, #dcece4 52%, #cbe4d7 100%);
+}
+@media (max-width: 620px) { .hal-panel { min-height: 520px; } }
+.hal-panel::before {
+  content: ""; position: absolute; inset: -25%;
+  background: radial-gradient(closest-side, rgba(255,255,255,.5), transparent 70%);
+  animation: hal-drift 22s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) { .hal-panel::before { animation: none; } }
+.hal-panel-in { position: relative; z-index: 10; padding: 48px; }
+@media (max-width: 620px) { .hal-panel-in { padding: 28px; } }
+.hal-panel h3 { margin: 0 0 20px; font-size: clamp(32px, 4.6vw, 48px); font-weight: 600; line-height: 1.12; letter-spacing: -0.03em; }
+.hal-panel p { margin: 0 0 32px; font-size: 16px; line-height: 1.65; max-width: 28rem; color: rgba(0,0,0,.7); }
+.hal-more { display: inline-flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; }
+.hal-more i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: rgba(255,255,255,.8); backdrop-filter: blur(6px); transition: background .2s ease, transform .22s cubic-bezier(.22,1,.36,1); }
+.hal-more:hover i { background: #fff; transform: translateX(3px); }
+.hal-more svg { width: 16px; height: 16px; }
+
+/* ---------- foot ---------- */
+.hal-foot { padding: 40px 24px 56px; border-top: 1px solid rgba(0,0,0,.08); }
+.hal-foot-in { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 13px; color: rgba(0,0,0,.55); }
+.hal-foot .sp { flex: 1; }
