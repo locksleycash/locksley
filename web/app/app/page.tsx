@@ -76,6 +76,16 @@ export default function Page() {
   const sgovSeries = useSgovSeries();
   const [stats, setStats] = useState<Stats | null>(null);
   const [showHow, setShowHow] = useState(true);
+  const [menu, setMenu] = useState(false);
+
+  // the drawer closes on Escape and locks the page behind it while open
+  useEffect(() => {
+    if (!menu) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("keydown", key);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", key); document.body.style.overflow = ""; };
+  }, [menu]);
 
   useEffect(() => {
     let on = true;
@@ -151,8 +161,31 @@ export default function Page() {
               ? <button className="bnk-btn ghost sm" onClick={() => wallet.disconnect()}>{short(wallet.address)}</button>
               : <button className="bnk-btn sm" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "CONNECT"}</button>}
           </div>
+          <button className={`bburger${menu ? " open" : ""}`} onClick={() => setMenu((v) => !v)} aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu}>
+            <i /><i /><i />
+          </button>
         </div>
       </header>
+
+      {menu && (
+        <>
+          <button className="bveil" onClick={() => setMenu(false)} aria-label="Close menu" />
+          <div className="bdrawer">
+            {NAV.map(([t, l]) => (
+              <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); setMenu(false); }}>
+                <span className="no">{NO[t]}</span><span>{HEAD[t]}</span><span className="k">{l}</span>
+              </button>
+            ))}
+            <a href="/docs" onClick={() => setMenu(false)}><span className="no">//</span><span>Docs</span><span className="k">READ</span></a>
+            <a href={SITE_URL} onClick={() => setMenu(false)}><span className="no">↖</span><span>Home</span><span className="k">SITE</span></a>
+            <div className="bdrawer-foot">
+              {wallet.address
+                ? <button className="bnk-btn ghost wide" onClick={() => { wallet.disconnect(); setMenu(false); }}>{short(wallet.address)} · disconnect</button>
+                : <button className="bnk-btn wide" onClick={() => { void wallet.connect(); setMenu(false); }} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect wallet"}</button>}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ---- status rail ---- */}
       <div className="btick">

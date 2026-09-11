@@ -549,3 +549,36 @@ a.bhist-r:hover { background: var(--em-soft); }
 .btabs .btab-link { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: .12em; padding: 10px 14px; color: var(--dim); border-radius: 8px; }
 .btabs .btab-link:hover { color: var(--em-2); background: var(--em-soft); }
 
+/* ---------- phone nav: tabs fold into a drawer ---------- */
+.bburger { display: none; width: 42px; height: 42px; flex: none; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.bburger i { display: block; width: 17px; height: 2px; border-radius: 2px; background: var(--ink); transition: transform .2s cubic-bezier(.22,1,.36,1), opacity .16s; }
+.bburger.open i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.bburger.open i:nth-child(2) { opacity: 0; }
+.bburger.open i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.bveil { position: fixed; inset: 0; z-index: 58; border: 0; background: rgba(0,0,0,.32); }
+.bdrawer {
+  position: fixed; z-index: 59; left: 0; right: 0; top: 63px;
+  background: #fff; border-bottom: 1px solid var(--line); box-shadow: 0 24px 40px -30px rgba(0,0,0,.4);
+  padding: 8px 16px 18px; display: flex; flex-direction: column;
+  animation: bdrop .18s cubic-bezier(.22,1,.36,1) both;
+}
+.bdrawer > button, .bdrawer > a {
+  display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 12px;
+  padding: 14px 4px; border: 0; border-bottom: 1px solid var(--line-soft); background: transparent;
+  color: var(--ink); text-align: left; font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.bdrawer > button:active, .bdrawer > a:active { background: var(--em-soft); }
+.bdrawer > button.on { color: var(--em-2); }
+.bdrawer .no { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--em); }
+.bdrawer .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; color: var(--faint); }
+.bdrawer-foot { padding-top: 14px; }
+
+@media (max-width: 760px) {
+  .btabs { display: none; }
+  .bburger { display: flex; margin-left: auto; }
+  .btop-r { margin-left: 0; }
+  .btop-r .bnk-btn.sm { padding: 0 11px; height: 34px; font-size: 10px; }
+  .btop-in { gap: 10px; }
+}
+

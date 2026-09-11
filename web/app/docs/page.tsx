@@ -209,6 +209,13 @@ function useScrollSpy() {
 
 export default function Docs() {
   const active = useScrollSpy();
+  const [menu, setMenu] = useState(false);
+  useEffect(() => {
+    if (!menu) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [menu]);
   return (
     <div className="docs">
       <nav className="docs-nav">
@@ -222,7 +229,31 @@ export default function Docs() {
         <a href={LINKS.github} className="dn-link" target="_blank" rel="noreferrer">GitHub</a>
         <a href={LINKS.x} className="dn-link" target="_blank" rel="noreferrer">X</a>
         <a href={APP} className="dn-cta">Open the app ↗</a>
+        <button className={`docs-burger${menu ? " open" : ""}`} onClick={() => setMenu((v) => !v)} aria-label={menu ? "Close contents" : "Open contents"} aria-expanded={menu}>
+          <i /><i /><i />
+        </button>
       </nav>
+
+      {menu && (
+        <>
+          <button className="docs-veil" onClick={() => setMenu(false)} aria-label="Close contents" />
+          <div className="docs-drawer">
+            {TOC.map((g) => (
+              <div key={g.group}>
+                <div className="toc-group">{g.group}</div>
+                {g.items.map((it) => (
+                  <a key={it.id} href={`#${it.id}`} className={active === it.id ? "on" : ""} onClick={() => setMenu(false)}>{it.label}</a>
+                ))}
+              </div>
+            ))}
+            <div className="docs-drawer-foot">
+              <a href="/" onClick={() => setMenu(false)}>Home</a>
+              <a href={LINKS.github} target="_blank" rel="noreferrer">GitHub</a>
+              <a href={LINKS.x} target="_blank" rel="noreferrer">X</a>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="docs-shell">
         <aside className="docs-side">
