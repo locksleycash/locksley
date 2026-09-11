@@ -16,11 +16,8 @@ const Arrow = () => (
 );
 
 /** The padlock-and-bow mark, same as the app's nav. */
-const Mark = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M7 10.5V8a5 5 0 0110 0v2.5" /><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M12 14v3.5" />
-  </svg>
-);
+// eslint-disable-next-line @next/next/no-img-element -- a 256px static mark; next/image buys nothing here.
+const Mark = () => <img className="hal-mark" src="/logo.png" alt="" width={28} height={28} />;
 
 /** Tickers accepted as collateral. Real symbols off the catalogue, so the rail
  *  states a fact rather than borrowing someone else's logo. */

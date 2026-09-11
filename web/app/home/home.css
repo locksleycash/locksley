@@ -200,3 +200,6 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 .hal-foot-addr { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: rgba(0,0,0,.45); margin-left: 6px; }
 .hal-foot-brand p { margin: 14px 0 12px; max-width: 32ch; font-size: 14px; line-height: 1.6; color: rgba(0,0,0,.6); }
 .hal-foot-live { font-size: 12px; font-weight: 600; color: #0b7d46; letter-spacing: .04em; }
+
+.hal-mark { width: 28px; height: 28px; display: block; }
+
