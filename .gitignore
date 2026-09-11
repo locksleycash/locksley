@@ -7,3 +7,5 @@ web/node_modules/
 web/.next/
 web/.env
 web/.vercel/
+node_modules/
+
