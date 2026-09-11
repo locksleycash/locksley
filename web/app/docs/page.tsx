@@ -7,6 +7,8 @@
 import { useEffect, useState } from "react";
 import "./docs.css";
 
+const APP = process.env.NEXT_PUBLIC_APP_URL ?? "/app";
+
 const TOC: { group: string; items: { id: string; label: string }[] }[] = [
   { group: "Start", items: [
     { id: "overview", label: "Overview" },
@@ -216,7 +218,7 @@ export default function Docs() {
         </a>
         <span style={{ flex: 1 }} />
         <a href="/" className="dn-link">Home</a>
-        <a href="/app" className="dn-cta">Open the app ↗</a>
+        <a href={APP} className="dn-cta">Open the app ↗</a>
       </nav>
 
       <div className="docs-shell">
@@ -543,7 +545,7 @@ export default function Docs() {
 
       <footer className="docs-foot">
         <span>© {new Date().getFullYear()} Locksley · non-custodial, no owner, no fee</span>
-        <a href="/app" className="dn-cta">Open the app ↗</a>
+        <a href={APP} className="dn-cta">Open the app ↗</a>
       </footer>
     </div>
   );

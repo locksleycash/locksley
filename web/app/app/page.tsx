@@ -13,6 +13,7 @@ import {
 import type { BankOrder } from "../api/bank/route.ts";
 import { CandleChart, Donut, Spark, useSgovSeries } from "../dash.tsx";
 import { StockLogo } from "../logo.tsx";
+import { SITE_URL } from "../../src/site.ts";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const SLIP = 0.99; // 1% floor on the SGOV swaps
@@ -133,11 +134,11 @@ export default function Page() {
       {/* ---- full-width nav ---- */}
       <header className="btop">
         <div className="bwrap btop-in">
-          <span className="btop-logo">
+          <a className="btop-logo" href={SITE_URL}>
             {/* eslint-disable-next-line @next/next/no-img-element -- static 256px mark */}
             <img src="/logo.png" alt="" width={22} height={22} style={{ display: "block" }} />
             LOCKSLEY<i className="cur" />
-          </span>
+          </a>
           <nav className="btabs">
             {NAV.map(([t, l]) => (
               <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); }}>{l}</button>

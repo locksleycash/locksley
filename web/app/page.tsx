@@ -4,6 +4,9 @@ import { poolFor } from "../src/pools.ts";
 import { StockLogo } from "./logo.tsx";
 import "./home.css";
 
+/** The dashboard lives on its own host in production and under /app locally. */
+const APP = process.env.NEXT_PUBLIC_APP_URL ?? "/app";
+
 export const metadata: Metadata = {
   title: "Locksley - non-custodial banking on RH Chain",
   description: "Savings held as short U.S. treasuries, payments that run on schedule, and loans against the stocks you already own. No admin key, no fees.",
@@ -69,10 +72,10 @@ export default function Home() {
               <a href="#pay">Pay</a>
               <a href="#borrow">Borrow</a>
               <a href="#built">Built on</a>
-              <a href="/app">Live stats</a>
+              <a href={APP}>Live stats</a>
               <a href="/docs">Docs</a>
             </div>
-            <a className="hal-cta" href="/app">Open the app</a>
+            <a className="hal-cta" href={APP}>Open the app</a>
           </div>
         </nav>
 
@@ -85,7 +88,7 @@ export default function Home() {
                 A non-custodial bank on RH Chain. Savings held as short U.S. treasuries,
                 payments that run on schedule, and loans against the stocks you already own.
               </p>
-              <a className="hal-pill" href="/app">Open the app<i><Arrow /></i></a>
+              <a className="hal-pill" href={APP}>Open the app<i><Arrow /></i></a>
 
               <div className="hal-marq hero" aria-hidden>
                 <div className="hal-marq-track">
@@ -108,7 +111,7 @@ export default function Home() {
           <div className="hal-row2">
             <div>
               <h2 className="hal-h2">Meet Locksley.</h2>
-              <a className="hal-pill" href="/app">Open the app<i><Arrow /></i></a>
+              <a className="hal-pill" href={APP}>Open the app<i><Arrow /></i></a>
             </div>
             <p className="hal-lede">
               A savings and loan, rebuilt as three contracts you can read: deposit and
@@ -163,7 +166,7 @@ export default function Home() {
             </p>
             <div className="hal-modes">
               {MODES.map(([n, t, d]) => (
-                <a className="hal-mode" href="/app" key={n}>
+                <a className="hal-mode" href={APP} key={n}>
                   <span className="hal-mode-n">{n}</span>
                   <span className="hal-mode-t"><b>{t}</b><small>{d}</small></span>
                   <i><Arrow /></i>
@@ -181,7 +184,7 @@ export default function Home() {
                 allowance. Anyone can push a due payment, so it never waits on us being
                 online, and cancelling returns whatever has not gone out yet.
               </p>
-              <a className="hal-more" href="/app"><i><Arrow /></i>Know more</a>
+              <a className="hal-more" href={APP}><i><Arrow /></i>Know more</a>
             </div>
           </div>
         </div>
@@ -197,10 +200,10 @@ export default function Home() {
 
           <div>
             <h4>Product</h4>
-            <a href="/app">Savings</a>
-            <a href="/app">Payments</a>
-            <a href="/app">Borrow &amp; Earn</a>
-            <a href="/app">Live Stats</a>
+            <a href={APP}>Savings</a>
+            <a href={APP}>Payments</a>
+            <a href={APP}>Borrow &amp; Earn</a>
+            <a href={APP}>Live Stats</a>
             <a href="/docs">Docs</a>
           </div>
 
