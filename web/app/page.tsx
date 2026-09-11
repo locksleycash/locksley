@@ -70,6 +70,7 @@ export default function Home() {
               <a href="#borrow">Borrow</a>
               <a href="#built">Built on</a>
               <a href="/app">Live stats</a>
+              <a href="/docs">Docs</a>
             </div>
             <a className="hal-cta" href="/app">Open the app</a>
           </div>
@@ -200,6 +201,7 @@ export default function Home() {
             <a href="/app">Payments</a>
             <a href="/app">Borrow &amp; Earn</a>
             <a href="/app">Live Stats</a>
+            <a href="/docs">Docs</a>
           </div>
 
           <div>

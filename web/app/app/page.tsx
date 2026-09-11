@@ -142,6 +142,7 @@ export default function Page() {
             {NAV.map(([t, l]) => (
               <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); }}>{l}</button>
             ))}
+            <a href="/docs" className="btab-link">DOCS</a>
           </nav>
           <div className="btop-r">
             {wallet.address && <span className="bnk-usdg">{fmt(usdg)} USDG</span>}

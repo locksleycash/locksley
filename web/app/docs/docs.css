@@ -1,0 +1,117 @@
+/* Locksley technical docs. The Presage docs layout - top bar, sticky grouped
+   table of contents, prose with hand-drawn SVG diagrams, reference tables -
+   carried over onto Locksley's paper: #F5F5F5, black type, lavender as the
+   only accent. Scoped to .docs. */
+
+.docs {
+  --paper: #f5f5f5; --card: #ffffff; --ink: #000000; --dim: #4b4b52; --faint: #8b8b93;
+  --line: #e2e2e6; --line-2: #cfcfd6; --lav: #7568b4; --lav-2: #5a4e96; --lav-soft: #f1eefa; --lav-line: #dcd6f0; --deep: #2b2644;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  position: fixed; inset: 0; z-index: 200; overflow-y: auto; overflow-x: hidden;
+  background: radial-gradient(120% 60% at 50% -10%, rgba(117,104,180,.10), transparent 60%), var(--paper);
+  color: var(--ink);
+  font-family: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  scroll-behavior: smooth; -webkit-font-smoothing: antialiased;
+}
+html:has(.docs), html:has(.docs) body { background: #f5f5f5; }
+.docs *, .docs *::before, .docs *::after { box-sizing: border-box; }
+.docs a { color: inherit; text-decoration: none; }
+
+/* ---------- top bar ---------- */
+.docs-nav {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px;
+  padding: 14px clamp(16px, 4vw, 40px);
+  background: rgba(245,245,245,.82); backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid var(--line);
+}
+.docs-nav .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: .2em; font-size: 14px; }
+.docs-nav .brand img { width: 22px; height: 22px; display: block; }
+.docs-nav .brand small { font-weight: 500; letter-spacing: .26em; color: var(--faint); font-size: 10px; border: 1px solid var(--line-2); padding: 2px 7px; border-radius: 999px; }
+.docs-nav .dn-link { color: var(--dim); font-size: 13px; transition: color .16s; }
+.docs-nav .dn-link:hover { color: var(--ink); }
+.docs-nav .dn-cta { font-size: 13px; font-weight: 600; color: #fff; background: var(--ink); padding: 9px 16px; border-radius: 999px; transition: background .16s, transform .12s; }
+.docs-nav .dn-cta:hover { background: var(--deep); }
+.docs-nav .dn-cta:active { transform: scale(.97); }
+
+/* ---------- shell ---------- */
+.docs-shell { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); display: grid; grid-template-columns: 1fr; gap: 40px; }
+@media (min-width: 940px) { .docs-shell { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; } }
+
+.docs-side { display: none; }
+@media (min-width: 940px) { .docs-side { display: block; position: sticky; top: 78px; align-self: start; height: max-content; padding-top: 40px; } }
+.docs-toc { display: grid; gap: 2px; border-left: 1px solid var(--line); }
+.docs-toc .toc-group { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--faint); padding: 16px 0 6px 16px; }
+.docs-toc a { display: block; font-size: 13px; color: var(--dim); padding: 6px 0 6px 16px; margin-left: -1px; border-left: 1px solid transparent; transition: color .14s, border-color .14s; }
+.docs-toc a:hover { color: var(--ink); }
+.docs-toc a.on { color: var(--ink); border-left-color: var(--lav); font-weight: 600; }
+
+/* ---------- hero ---------- */
+.docs-hero { padding: clamp(56px, 10vw, 104px) 0 30px; }
+.docs-hero .eyebrow { font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: var(--lav-2); }
+.docs-hero h1 { font-size: clamp(40px, 8vw, 78px); line-height: 1.02; letter-spacing: -.04em; font-weight: 400; margin: 18px 0 20px; }
+.docs-hero h1 b { font-weight: 700; }
+.docs-hero p.lead { font-size: clamp(15px, 2.2vw, 19px); color: var(--dim); max-width: 640px; line-height: 1.7; margin: 0; }
+.docs-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.docs-chip { font-size: 12px; color: var(--dim); border: 1px solid var(--line-2); background: #fff; border-radius: 999px; padding: 6px 13px; }
+.docs-chip b { color: var(--ink); font-weight: 600; }
+
+/* ---------- prose ---------- */
+.docs-main { padding-bottom: 120px; min-width: 0; }
+.docs-sec { padding-top: 54px; scroll-margin-top: 78px; }
+.docs-sec > .kicker { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: var(--lav-2); margin-bottom: 14px; }
+.docs-sec > .kicker::before { content: ""; width: 22px; height: 1px; background: var(--lav); }
+.docs-sec h2 { font-size: clamp(26px, 4.5vw, 40px); line-height: 1.1; letter-spacing: -.03em; font-weight: 400; margin: 0 0 18px; }
+.docs-sec h2 b { font-weight: 700; }
+.docs-sec h3 { font-size: 18px; font-weight: 600; margin: 30px 0 10px; letter-spacing: -.01em; }
+.docs-main p { color: var(--dim); line-height: 1.75; font-size: 15px; margin: 0 0 14px; max-width: 680px; }
+.docs-main p strong, .docs-main li strong { color: var(--ink); font-weight: 600; }
+.docs-main ul { list-style: none; display: grid; gap: 9px; margin: 6px 0 16px; padding: 0; max-width: 680px; }
+.docs-main li { position: relative; padding-left: 20px; color: var(--dim); font-size: 15px; line-height: 1.65; }
+.docs-main li::before { content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--lav); }
+.docs .mono { font-family: var(--mono); font-size: .86em; color: var(--lav-2); background: var(--lav-soft); border: 1px solid var(--lav-line); padding: 1px 6px; border-radius: 5px; word-break: break-word; }
+
+/* callout */
+.docs-note { display: flex; gap: 12px; border: 1px solid var(--line); border-left: 2px solid var(--lav); background: linear-gradient(180deg, rgba(117,104,180,.07), transparent); border-radius: 10px; padding: 16px 18px; margin: 20px 0; max-width: 680px; }
+.docs-note.warn { border-left-color: #d99a1f; background: linear-gradient(180deg, rgba(217,154,31,.09), transparent); }
+.docs-note .n-ico { color: var(--lav); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+.docs-note.warn .n-ico { color: #b47a0f; }
+.docs-note p { margin: 0; font-size: 14px; color: var(--dim); }
+
+/* formula block */
+.docs-formula { font-family: var(--mono); font-size: 13.5px; color: #f5f5f5; background: var(--deep); border: 1px solid var(--deep); border-radius: 12px; padding: 18px 20px; margin: 18px 0; overflow-x: auto; line-height: 1.9; max-width: 680px; }
+.docs-formula .cm { color: #a89fcf; }
+.docs-formula .gr { color: #c9bff0; }
+
+/* diagram frame */
+.diagram { border: 1px solid var(--line); border-radius: 14px; background: radial-gradient(100% 100% at 50% 0%, rgba(117,104,180,.06), transparent), #fff; padding: 26px 20px; margin: 22px 0; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .dg-cap { text-align: center; font-size: 12px; color: var(--faint); margin-top: 16px; letter-spacing: .02em; }
+.dg-box { fill: #fafafb; stroke: #cfcfd6; }
+.dg-box.accent { fill: var(--lav-soft); stroke: var(--lav); }
+.dg-box.deep { fill: var(--deep); stroke: var(--deep); }
+.dg-box.warn { fill: #fdf3e0; stroke: #d99a1f; }
+.dg-t { fill: #000; font-family: var(--font-poppins), "Poppins", sans-serif; }
+.dg-t.dim { fill: #6b6b73; }
+.dg-t.lav { fill: var(--lav-2); }
+.dg-t.on { fill: #fff; }
+.dg-t.warn { fill: #9a6a0a; }
+.dg-t.mono { fill: var(--lav-2); font-family: var(--mono); }
+.dg-line { stroke: #b9b9c2; fill: none; }
+.dg-line.lav { stroke: var(--lav); }
+.dg-line.dash { stroke-dasharray: 4 4; }
+
+/* reference tables */
+.docs-table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.docs-table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
+.docs-table th { text-align: left; font-weight: 600; color: var(--faint); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.docs-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--dim); vertical-align: top; }
+.docs-table tr:last-child td { border-bottom: none; }
+.docs-table td .mono { font-size: 12px; }
+.docs-table td.name { color: var(--ink); font-weight: 600; white-space: nowrap; }
+
+/* footer */
+.docs-foot { border-top: 1px solid var(--line); padding: 40px clamp(16px, 4vw, 40px); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; color: var(--faint); font-size: 13px; max-width: 1180px; margin: 0 auto; }
+.docs-foot a { color: var(--dim); }
+.docs-foot a:hover { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) { .docs { scroll-behavior: auto; } }
