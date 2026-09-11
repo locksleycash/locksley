@@ -110,11 +110,20 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 .hal-c.dark h3 { color: #fff; }
 .hal-c.dark p { color: rgba(255,255,255,.6); }
 
-/* ---------- 4. built on ---------- */
+/* ---------- 4. built on: boxed, so the rail has an edge ---------- */
 .hal-built { padding: 0 24px 24px; }
-.hal-built-in { display: grid; grid-template-columns: 1fr 3fr; gap: 32px; align-items: center; }
-@media (max-width: 900px) { .hal-built-in { grid-template-columns: 1fr; gap: 20px; } }
-.hal-built p { margin: 0; font-size: 16px; line-height: 1.6; color: rgba(0,0,0,.7); }
+.hal-built-in {
+  display: grid; grid-template-columns: 1fr 3fr; gap: 0; align-items: stretch;
+  background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 24px; overflow: hidden;
+}
+.hal-built-in > p { margin: 0; padding: 28px 32px; font-size: 16px; line-height: 1.6; color: rgba(0,0,0,.7); border-right: 1px solid rgba(0,0,0,.08); display: flex; align-items: center; }
+.hal-built-in .hal-marq { padding: 28px 0; align-self: center; }
+@media (max-width: 900px) {
+  .hal-built-in { grid-template-columns: 1fr; }
+  .hal-built-in > p { border-right: 0; border-bottom: 1px solid rgba(0,0,0,.08); padding: 22px 24px; font-size: 15px; }
+  .hal-built-in .hal-marq { padding: 20px 0; }
+  .hal-marq.backers span { margin: 0 24px; }
+}
 
 /* ---------- 5. use cases ---------- */
 .hal-eyebrow { font-size: 14px; color: rgba(0,0,0,.6); margin-bottom: 8px; }
@@ -125,8 +134,6 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 @media (max-width: 900px) { .hal-uses-l { padding-right: 0; } }
 .hal-uses-l p { margin: 0; font-size: 16px; line-height: 1.6; max-width: 20rem; color: rgba(0,0,0,.6); }
 .hal-panel { position: relative; border-radius: 28px; overflow: hidden; min-height: 720px; background: #e6ece9; }
-@media (max-width: 620px) { .hal-panel { position: relative; border-radius: 28px; overflow: hidden; min-height: 720px; background: #e6ece9; }
-@media (prefers-reduced-motion: reduce) { .hal-panel::before { animation: none; } }
 .hal-panel-in { position: relative; z-index: 10; padding: 48px; }
 @media (max-width: 620px) { .hal-panel-in { padding: 28px; } }
 .hal-panel h3 { margin: 0 0 20px; font-size: clamp(32px, 4.6vw, 48px); font-weight: 600; line-height: 1.12; letter-spacing: -0.03em; }
@@ -140,3 +147,56 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 .hal-foot { padding: 40px 24px 56px; border-top: 1px solid rgba(0,0,0,.08); }
 .hal-foot-in { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 13px; color: rgba(0,0,0,.55); }
 .hal-foot .sp { flex: 1; }
+
+/* ---------- dark cards: a looping mark in the empty middle ---------- */
+.hal-c.dark { position: relative; }
+.hal-c-ico { display: grid; place-items: center; flex: 1; padding: 10px 0; }
+.hal-ani { width: 96px; height: 96px; color: #fff; overflow: visible; }
+
+/* card 2, "withdraw whenever": the shackle lifts and the arrow leaves - motion,
+   not drawing, so it reads as an action */
+.hal-ani.open .shackle { transform-origin: 44px 23px; animation: hal-unlock 3.4s ease-in-out infinite; }
+.hal-ani.open .out { animation: hal-out 3.4s ease-in-out infinite; }
+.hal-ani.open { animation: hal-nudge 3.4s ease-in-out infinite; }
+@keyframes hal-unlock { 0%, 30% { transform: translateY(0) rotate(0); } 45%, 80% { transform: translateY(-7px) rotate(-14deg); } 100% { transform: translateY(0) rotate(0); } }
+@keyframes hal-out { 0%, 40% { transform: translateY(0); opacity: 1; } 75% { transform: translateY(-14px); opacity: 0; } 76% { transform: translateY(6px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+@keyframes hal-nudge { 45%, 80% { transform: translateY(-2px); } }
+
+/* card 3, "nobody holds it but you": the case redraws itself and the keyhole
+   breathes - stillness with a pulse, the opposite gesture */
+.hal-ani.hold path, .hal-ani.hold rect, .hal-ani.hold circle { stroke-dasharray: 1; animation: hal-draw 6s ease-in-out infinite; }
+.hal-ani.hold .key { animation: hal-draw 6s ease-in-out infinite, hal-pulse 2s ease-in-out infinite; transform-origin: 32px 42px; }
+.hal-ani.hold { animation: hal-breathe 6s ease-in-out infinite; }
+@keyframes hal-draw { 0% { stroke-dashoffset: 1; } 40%, 62% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; } }
+@keyframes hal-pulse { 50% { stroke-width: 2.6; opacity: .55; } }
+@keyframes hal-breathe { 50% { transform: scale(1.04); } }
+
+/* ---------- use modes: left column carries the three jobs ---------- */
+.hal-uses-l { display: flex; flex-direction: column; }
+.hal-modes { margin-top: 28px; display: flex; flex-direction: column; border-top: 1px solid rgba(0,0,0,.1); }
+.hal-mode { display: grid; grid-template-columns: 34px 1fr 36px; align-items: center; gap: 14px; padding: 18px 0; border-bottom: 1px solid rgba(0,0,0,.1); transition: padding-left .2s ease; }
+.hal-mode:hover { padding-left: 6px; }
+.hal-mode-n { font-size: 12px; font-weight: 600; color: rgba(0,0,0,.4); letter-spacing: .06em; }
+.hal-mode-t b { display: block; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+.hal-mode-t small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.5; color: rgba(0,0,0,.6); }
+.hal-mode i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; border: 1px solid rgba(0,0,0,.15); color: #000; transition: background .2s, color .2s, transform .22s cubic-bezier(.22,1,.36,1); }
+.hal-mode i svg { width: 15px; height: 15px; }
+.hal-mode:hover i { background: #000; color: #fff; transform: translateX(3px); }
+.hal-panel { min-height: 620px; isolation: isolate; }
+.hal-vid { z-index: 0; }
+.hal-panel-in { z-index: 2; }
+/* the copy sits on a paper wash so it reads over any frame of the footage */
+.hal-panel-in { background: linear-gradient(180deg, rgba(245,245,245,.92) 0%, rgba(245,245,245,.7) 70%, rgba(245,245,245,0) 100%); padding-bottom: 80px; }
+@media (max-width: 900px) { .hal-panel { min-height: 520px; } }
+
+/* ---------- footer ---------- */
+.hal-foot { padding: 56px 24px 40px; border-top: 1px solid rgba(0,0,0,.1); }
+.hal-foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1.2fr 1fr; gap: 32px; padding-bottom: 36px; border-bottom: 1px solid rgba(0,0,0,.08); margin-bottom: 22px; }
+@media (max-width: 900px) { .hal-foot-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .hal-foot-grid { grid-template-columns: 1fr; } }
+.hal-foot-grid h4 { margin: 0 0 12px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.45); }
+.hal-foot-grid > div > a { display: block; padding: 6px 0; font-size: 14px; color: rgba(0,0,0,.75); transition: color .16s; }
+.hal-foot-grid > div > a:hover { color: #000; }
+.hal-foot-addr { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: rgba(0,0,0,.45); margin-left: 6px; }
+.hal-foot-brand p { margin: 14px 0 12px; max-width: 32ch; font-size: 14px; line-height: 1.6; color: rgba(0,0,0,.6); }
+.hal-foot-live { font-size: 12px; font-weight: 600; color: #0b7d46; letter-spacing: .04em; }

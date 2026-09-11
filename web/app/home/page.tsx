@@ -39,6 +39,20 @@ const BUILT: [string, React.CSSProperties][] = [
   ["EVM 4663", { fontFamily: "'Times New Roman', serif", fontWeight: 400, letterSpacing: "0.02em", fontSize: 15 }],
 ];
 
+/** The three contracts, as deployed. Every address links to its verified source. */
+const CONTRACTS: [string, string][] = [
+  ["Savings", "0xF28571Da91c7A8d3511A57f81b57098f9d1970b8"],
+  ["StandingOrders", "0x9188572646DCa8460360267CCE10cB88a764743E"],
+  ["CollateralLoan", "0x4b5181c539954b28cF69a05b9eC45161c6eC587A"],
+];
+
+/** The three jobs one deposit can do. */
+const MODES: [string, string, string][] = [
+  ["01", "Save", "USDG becomes SGOV. Withdraw the free part any second; lock a term if you want to."],
+  ["02", "Pay", "Escrow once, it pays out on schedule. Cancel and the rest comes back."],
+  ["03", "Borrow", "Post a stock, draw up to half its value in USDG, never sell."],
+];
+
 const CARDS: [string, string, string][] = [
   ["Savings that earn the bill", "Your USDG buys SGOV - short U.S. treasuries - held in the vault under your name. The yield is the treasury bill's, not a rate we invented.", "art"],
   ["Withdraw whenever", "Nothing is locked unless you choose a term yourself. The free balance leaves the moment you ask for it.", "dark"],
@@ -109,6 +123,15 @@ export default function Home() {
             {CARDS.map(([h, p, kind], i) => (
               <div className={`hal-c ${kind}${i === 0 ? " wide" : ""}`} key={h}>
                 <h3>{h}</h3>
+                {kind === "dark" && (
+                  <span className="hal-c-ico" aria-hidden>
+                    <svg className={i === 1 ? "hal-ani open" : "hal-ani hold"} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      {i === 1
+                        ? <><path className="shackle" d="M20 28V20a12 12 0 0124 0v3" /><rect x="14" y="28" width="36" height="26" rx="5" /><path className="out" d="M32 47V36M26 41l6-6 6 6" /></>
+                        : <><rect x="12" y="26" width="40" height="28" rx="5" pathLength={1} /><path d="M20 26v-6a12 12 0 0124 0v6" pathLength={1} /><circle className="key" cx="32" cy="40" r="4" pathLength={1} /><path className="key" d="M32 44v5" pathLength={1} /></>}
+                    </svg>
+                  </span>
+                )}
                 <p>{p}</p>
               </div>
             ))}
@@ -140,6 +163,15 @@ export default function Home() {
               One deposit, three jobs. Treasuries hold the balance, standing orders move
               it on time, and a loan draws against the stocks without touching either.
             </p>
+            <div className="hal-modes">
+              {MODES.map(([n, t, d]) => (
+                <a className="hal-mode" href="/" key={n}>
+                  <span className="hal-mode-n">{n}</span>
+                  <span className="hal-mode-t"><b>{t}</b><small>{d}</small></span>
+                  <i><Arrow /></i>
+                </a>
+              ))}
+            </div>
           </div>
 
           <div className="hal-panel" id="borrow">
@@ -158,10 +190,43 @@ export default function Home() {
       </section>
 
       <footer className="hal-foot">
+        <div className="hal-in hal-foot-grid">
+          <div className="hal-foot-brand">
+            <span className="hal-brand" style={{ fontSize: 20 }}><Mark />Locksley</span>
+            <p>A savings and loan rebuilt as three contracts you can read. Only your key moves your money.</p>
+            <span className="hal-foot-live">● Live on RH Chain · 4663</span>
+          </div>
+
+          <div>
+            <h4>Product</h4>
+            <a href="/">Savings</a>
+            <a href="/">Payments</a>
+            <a href="/">Borrow &amp; Earn</a>
+            <a href="/">Live Stats</a>
+          </div>
+
+          <div>
+            <h4>Contracts</h4>
+            {CONTRACTS.map(([name, addr]) => (
+              <a key={addr} href={`https://robinhoodchain.blockscout.com/address/${addr}`} target="_blank" rel="noreferrer">
+                {name} <span className="hal-foot-addr">{addr.slice(0, 6)}…{addr.slice(-4)}</span>
+              </a>
+            ))}
+          </div>
+
+          <div>
+            <h4>Network</h4>
+            <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noreferrer">Explorer</a>
+            <a href="https://robinhoodchain.blockscout.com/token/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168" target="_blank" rel="noreferrer">USDG</a>
+            <a href="https://robinhoodchain.blockscout.com/token/0x92FD66527192E3e61d4DDd13322Aa222DE86F9B5" target="_blank" rel="noreferrer">SGOV</a>
+            <a href="#built">Built on</a>
+          </div>
+        </div>
+
         <div className="hal-in hal-foot-in">
-          <span className="hal-brand" style={{ fontSize: 18 }}><Mark />Locksley</span>
+          <span>© {new Date().getFullYear()} Locksley</span>
           <span className="sp" />
-          <span>Non-custodial. No admin key, no pause switch, no fee.</span>
+          <span>Non-custodial. No admin key, no pause switch, no fee. Not a bank; not FDIC insured.</span>
         </div>
       </footer>
     </div>
