@@ -5,6 +5,7 @@
 // custody model. Every figure here is a constant in the contracts, not copy.
 
 import { useEffect, useState } from "react";
+import { LINKS } from "../../src/site.ts";
 import "./docs.css";
 
 const APP = process.env.NEXT_PUBLIC_APP_URL ?? "/app";
@@ -218,6 +219,8 @@ export default function Docs() {
         </a>
         <span style={{ flex: 1 }} />
         <a href="/" className="dn-link">Home</a>
+        <a href={LINKS.github} className="dn-link" target="_blank" rel="noreferrer">GitHub</a>
+        <a href={LINKS.x} className="dn-link" target="_blank" rel="noreferrer">X</a>
         <a href={APP} className="dn-cta">Open the app ↗</a>
       </nav>
 
@@ -545,7 +548,11 @@ export default function Docs() {
 
       <footer className="docs-foot">
         <span>© {new Date().getFullYear()} Locksley · non-custodial, no owner, no fee</span>
-        <a href={APP} className="dn-cta">Open the app ↗</a>
+        <span style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <a href={LINKS.x} target="_blank" rel="noreferrer">@locksleybank</a>
+          <a href={LINKS.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href={APP} className="dn-cta">Open the app ↗</a>
+        </span>
       </footer>
     </div>
   );

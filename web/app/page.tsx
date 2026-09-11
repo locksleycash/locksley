@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { STOCKS } from "../src/stocks.ts";
 import { poolFor } from "../src/pools.ts";
 import { StockLogo } from "./logo.tsx";
+import { LINKS } from "../src/site.ts";
 import "./home.css";
 
 /** The dashboard lives on its own host in production and under /app locally. */
@@ -74,6 +75,10 @@ export default function Home() {
               <a href="#built">Built on</a>
               <a href={APP}>Live stats</a>
               <a href="/docs">Docs</a>
+            </div>
+            <div className="hal-social">
+              <a href={LINKS.x} target="_blank" rel="noreferrer" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M18.9 2H22l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.3 22H2.1l7.7-8.8L1 2h6.8l4.7 6.2L18.9 2Zm-1.2 18h1.8L7.3 3.9H5.4L17.7 20Z" /></svg></a>
+              <a href={LINKS.github} target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z" /></svg></a>
             </div>
             <a className="hal-cta" href={APP}>Open the app</a>
           </div>
@@ -223,10 +228,21 @@ export default function Home() {
             <a href="https://robinhoodchain.blockscout.com/token/0x92FD66527192E3e61d4DDd13322Aa222DE86F9B5" target="_blank" rel="noreferrer">SGOV</a>
             <a href="#built">Built on</a>
           </div>
+
+          <div>
+            <h4>Community</h4>
+            <a href={LINKS.x} target="_blank" rel="noreferrer">X · @locksleybank</a>
+            <a href={LINKS.github} target="_blank" rel="noreferrer">GitHub · source</a>
+            <a href="/docs">Docs</a>
+            <a href={APP}>Open the app</a>
+          </div>
         </div>
 
         <div className="hal-in hal-foot-in">
           <span>© {new Date().getFullYear()} Locksley</span>
+          <a href={LINKS.x} target="_blank" rel="noreferrer">@locksleybank</a>
+          <a href={LINKS.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href="/docs">Docs</a>
           <span className="sp" />
           <span>Non-custodial. No admin key, no pause switch, no fee. Not a bank; not FDIC insured.</span>
         </div>
