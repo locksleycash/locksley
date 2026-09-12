@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { STOCKS } from "../src/stocks.ts";
 import { poolFor } from "../src/pools.ts";
 import { StockLogo } from "./logo.tsx";
-import { LINKS } from "../src/site.ts";
+import { LINKS, TOKEN } from "../src/site.ts";
+import { CopyAddress } from "./copy.tsx";
 import "./home.css";
 
 /** The dashboard lives on its own host in production and under /app locally. */
@@ -109,6 +110,20 @@ export default function Home() {
           </div>
         </header>
       </div>
+
+      {/* ---- token ---- */}
+      <section className="hal-token" id="token">
+        <div className="hal-in hal-token-in">
+          <div>
+            <span className="badge"><b>LSBK</b>Locksley Bank · RH Chain 4663</span>
+            <p>Token contract. Verify the address here before you trade it anywhere — this is the only one.</p>
+          </div>
+          <div className="hal-token-r">
+            <CopyAddress value={TOKEN} />
+            <a href={`https://robinhoodchain.blockscout.com/token/${TOKEN}`} target="_blank" rel="noreferrer">Blockscout ↗</a>
+          </div>
+        </div>
+      </section>
 
       {/* ---- 3. what it is ---- */}
       <section className="hal-sec" id="save">
@@ -226,6 +241,7 @@ export default function Home() {
             <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noreferrer">Explorer</a>
             <a href="https://robinhoodchain.blockscout.com/token/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168" target="_blank" rel="noreferrer">USDG</a>
             <a href="https://robinhoodchain.blockscout.com/token/0x92FD66527192E3e61d4DDd13322Aa222DE86F9B5" target="_blank" rel="noreferrer">SGOV</a>
+            <a href={`https://robinhoodchain.blockscout.com/token/${TOKEN}`} target="_blank" rel="noreferrer">LSBK token <span className="hal-foot-addr">{TOKEN.slice(0, 6)}…{TOKEN.slice(-4)}</span></a>
             <a href="#built">Built on</a>
           </div>
 

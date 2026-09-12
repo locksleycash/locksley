@@ -213,3 +213,17 @@ html:has(.hal), html:has(.hal) body { background: #f5f5f5; }
 
 .hal-mark { width: 28px; height: 28px; display: block; }
 
+
+/* ---------- token strip ---------- */
+.hal-token { padding: 0 24px; margin-top: -8px; }
+.hal-token-in { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 24px; padding: 22px 28px; }
+.hal-token-in > div:first-child { flex: 1; min-width: 260px; }
+.hal-token-in p { margin: 10px 0 0; font-size: 13.5px; line-height: 1.55; color: rgba(0,0,0,.6); max-width: 46ch; }
+.hal-token-r { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hal-token-r > a { font-size: 13px; font-weight: 600; color: rgba(0,0,0,.65); }
+.hal-token-r > a:hover { color: #000; }
+.hal-ca { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(0,0,0,.12); border-radius: 999px; overflow: hidden; background: #f7f7f9; max-width: 100%; }
+.hal-ca code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; padding: 10px 14px; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hal-ca button { border: 0; border-left: 1px solid rgba(0,0,0,.12); background: #000; color: #fff; font-size: 12px; font-weight: 600; padding: 10px 14px; cursor: pointer; }
+.hal-ca button:hover { background: #2b2644; }
+@media (max-width: 620px) { .hal-ca code { font-size: 11px; padding: 9px 10px; } .hal-token-in { padding: 18px; } }

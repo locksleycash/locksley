@@ -566,6 +566,7 @@ export default function Docs() {
               <table className="docs-table">
                 <thead><tr><th>Name</th><th>Role</th><th>Address</th></tr></thead>
                 <tbody>
+                  <tr><td className="name">LSBK</td><td>Locksley Bank token, 18 decimals, 1,000,000,000 supply</td><td><a href="https://robinhoodchain.blockscout.com/token/0xF50ceF741082045DC8d15F82E8104F85744B24ea" target="_blank" rel="noreferrer"><span className="mono">0xF50ceF741082045DC8d15F82E8104F85744B24ea</span></a></td></tr>
                   <tr><td className="name">USDG</td><td>Quote asset, 6 decimals</td><td><span className="mono">0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168</span></td></tr>
                   <tr><td className="name">SGOV</td><td>Savings backing, 18 decimals</td><td><span className="mono">0x92FD66527192E3e61d4DDd13322Aa222DE86F9B5</span></td></tr>
                   <tr><td className="name">Uniswap v3 Factory</td><td>Pool lookup</td><td><span className="mono">0x1f7d7550B1b028f7571E69A784071F0205FD2EfA</span></td></tr>
